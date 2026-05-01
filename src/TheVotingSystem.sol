@@ -131,7 +131,7 @@ contract Voting {
 
     // see the winner
     function seeWinner() public view returns (string memory) {
-        require(status == Status.Active, "the vote is not closed yet");
+        require(status == Status.Closed, "the vote is not closed yet");
 
         if(yesVote > noVote) {
             return "yes won";
