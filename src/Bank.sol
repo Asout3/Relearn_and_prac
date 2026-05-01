@@ -31,18 +31,6 @@ so ya i kinda figured it out we don't use array we use mapping i watched vidoe a
 
 // and i know it is not gas optimised but this is like my first solidty in like a lot of month.
 contract Bank {
-    // as i said i can't use array cuz it have this special thing called mapping which is cool like it puts like shit1 : shit2 so it can do that
-    address public owner;
-    mapping(address => uint256) public balance;
-    
-    fallback() external payable {
-        emit fallBackWasCalled(msg.sender, msg.value);
-    }
-    receive() external payable {
-        balance[msg.sender] += msg.value;
-        emit Deposit(msg.sender, msg.value);
-    }
-
     // this are my events that i declared
     // NOTE: Event naming is not correct so we got to use PascalCase; eg. Deposit, Withdraw, FallBackWasCalled.
     // so in events we don't use indexed like when we serach is we use the indexed okay.
@@ -50,6 +38,19 @@ contract Bank {
     event Withdraw(address  indexed _user, uint256  amount);
     event FallBackWasCalled(address  _user, uint256  amount);
 
+    // as i said i can't use array cuz it have this special thing called mapping which is cool like it puts like shit1 : shit2 so it can do that
+    address public owner;
+    mapping(address => uint256) public balance;
+    
+    fallback() external payable {
+        emit FallBackWasCalled(msg.sender, msg.value);
+    }
+    receive() external payable {
+        balance[msg.sender] += msg.value;
+        emit Deposit(msg.sender, msg.value);
+    }
+
+    
     constructor() {
         owner = msg.sender;
     }
