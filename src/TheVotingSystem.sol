@@ -2,26 +2,26 @@
 pragma solidity ^0.8.30;
 
 /**
-THE QUESTION:
-
-The Voting Contract
-Write a Solidity contract called Voting that does the following:
-
-Owner creates a proposal with a name and description
-The contract has 3 states: Pending, Active, Closed — using an enum
-Owner can start the vote (Pending → Active) and end it (Active → Closed)
-Any address can vote — but only once, and only when state is Active
-Anyone can view the current vote count
-
-Requirements:
-
-Use a struct for the proposal
-Use an enum for the state
-Track who has already voted using a mapping
-Revert with a custom error if someone tries to vote twice
-Revert with a custom error if voting isn't active
-Emit an event when someone votes
-*/
+ * THE QUESTION:
+ *
+ * The Voting Contract
+ * Write a Solidity contract called Voting that does the following:
+ *
+ * Owner creates a proposal with a name and description
+ * The contract has 3 states: Pending, Active, Closed — using an enum
+ * Owner can start the vote (Pending → Active) and end it (Active → Closed)
+ * Any address can vote — but only once, and only when state is Active
+ * Anyone can view the current vote count
+ *
+ * Requirements:
+ *
+ * Use a struct for the proposal
+ * Use an enum for the state
+ * Track who has already voted using a mapping
+ * Revert with a custom error if someone tries to vote twice
+ * Revert with a custom error if voting isn't active
+ * Emit an event when someone votes
+ */
 
 /*
 HOW DO WE TACKEL THIS PROBLEM?
@@ -38,7 +38,6 @@ error AlreadyVoted();
 error NotActive();
 
 contract Voting {
-
     // this is the events
     event VotedYes(address indexed user);
     event VotedNo(address indexed user);
@@ -46,9 +45,9 @@ contract Voting {
     event VotedCancled();
 
     // this is the struct proposal i don't know why it want me to use the struct it would be gas effective and like better if i use just a constructor
-    struct Proposal{
-        string  name;
-        string  description;
+    struct Proposal {
+        string name;
+        string description;
     }
 
     // enum for the states of the voting.
@@ -58,18 +57,17 @@ contract Voting {
         Closed
     }
 
-    //the proposal struct assignment 
+    //the proposal struct assignment
     Proposal public proposal;
     // declar of the owner of the contract
     address private owner;
 
     // this is the constructor it have the name and the discription of the contract.
     constructor() {
-        proposal.name = "Should we add pool in the house?"; // the name 
+        proposal.name = "Should we add pool in the house?"; // the name
         proposal.description = "should we add a swiming pool to the new house that we are building."; // the discription
         owner = msg.sender; // intialitation of the owner in the contract so no one could change it so its it won't fuck up
     }
-    
 
     // for the onlyowner to check
     modifier onlyOwner() {
@@ -77,7 +75,7 @@ contract Voting {
         _;
     }
 
-    Status public status; // declaring 
+    Status public status; // declaring
     uint256 public yesVote; // storage for the yes vote
     uint256 public noVote; // storage for no vote
 
@@ -101,8 +99,8 @@ contract Voting {
 
     // yes voting
     function voteYes() public {
-        if(status != Status.Active) revert NotActive();
-        if(hasVoted[msg.sender] == true) revert AlreadyVoted();
+        if (status != Status.Active) revert NotActive();
+        if (hasVoted[msg.sender] == true) revert AlreadyVoted();
 
         yesVote++;
         hasVoted[msg.sender] = true;
@@ -111,8 +109,8 @@ contract Voting {
 
     // no voting
     function voteNo() public {
-        if(status != Status.Active) revert NotActive();
-        if(hasVoted[msg.sender] == true) revert AlreadyVoted();
+        if (status != Status.Active) revert NotActive();
+        if (hasVoted[msg.sender] == true) revert AlreadyVoted();
 
         noVote++;
         hasVoted[msg.sender] = true;
@@ -133,7 +131,7 @@ contract Voting {
     function seeWinner() public view returns (string memory) {
         require(status == Status.Closed, "the vote is not closed yet");
 
-        if(yesVote > noVote) {
+        if (yesVote > noVote) {
             return "yes won";
         } else if (yesVote == noVote) {
             return "its a tie";
@@ -141,6 +139,4 @@ contract Voting {
             return "no won";
         }
     }
-
-
 }

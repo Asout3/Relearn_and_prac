@@ -8,12 +8,7 @@ contract Deploy is Script {
     function run() external {
         vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
 
-        new Asout3Token(
-            "Asout3 Token",
-            "AST",
-            18,
-            100000 ether
-        );
+        new Asout3Token("Asout3 Token", "AST", 18, 100000 ether);
 
         vm.stopBroadcast();
     }

@@ -38,14 +38,13 @@ let me explain the code
 error YouAreNotOwnerOfTheTask();
 error AlreadyCompeleted();
 
-
 contract onChainTodo {
     // events
     event TaskCreated(string _title, uint256 _id);
     event TaskCompleted(uint256 _id);
     event TaskDeleted(uint256 _id);
 
-    // struct that holds all the info about the task 
+    // struct that holds all the info about the task
     struct TodoInfo {
         string title;
         address creatorAddress;
@@ -59,37 +58,33 @@ contract onChainTodo {
     uint256 public taksCount = 0;
 
     // a function that creates new task
-    // _title is the title of the taks 
+    // _title is the title of the taks
     // then i set it up emit and log the id
     // then increment the id
     function createTask(string memory _title) public {
-       todoInfo[id] = TodoInfo(
-        _title,
-        msg.sender,
-        false
-       );
+        todoInfo[id] = TodoInfo(_title, msg.sender, false);
 
-       emit TaskCreated(todoInfo[id].title, id);
-       id++;
-       taksCount++;
+        emit TaskCreated(todoInfo[id].title, id);
+        id++;
+        taksCount++;
     }
 
     // function to mark complete a task it takes id then do its job
     // ofcourse i can use modifer to do like check if it is the owner but i wanted this
     // its easy
     function markComplete(uint256 _id) public {
-        if(todoInfo[_id].isCompleted == true) revert AlreadyCompeleted();
-        if(todoInfo[_id].creatorAddress != msg.sender) revert YouAreNotOwnerOfTheTask();
+        if (todoInfo[_id].isCompleted == true) revert AlreadyCompeleted();
+        if (todoInfo[_id].creatorAddress != msg.sender) revert YouAreNotOwnerOfTheTask();
 
         emit TaskCompleted(_id);
 
-        todoInfo[_id].isCompleted = true; 
+        todoInfo[_id].isCompleted = true;
     }
 
     // delete taks it just delete it
     function deleteTask(uint256 _id) public {
         // i think it doesn't matter if the task is compeleted or not
-        if(todoInfo[_id].creatorAddress != msg.sender) revert YouAreNotOwnerOfTheTask();
+        if (todoInfo[_id].creatorAddress != msg.sender) revert YouAreNotOwnerOfTheTask();
 
         emit TaskDeleted(_id);
 
@@ -98,15 +93,12 @@ contract onChainTodo {
         taksCount--;
     }
 
-
     // getter function you can understand by theri name
     function getTask(uint256 _id) public view returns (TodoInfo memory) {
-
         return todoInfo[_id];
     }
 
     function getAmountOfTask() public view returns (uint256) {
         return taksCount;
     }
-
 }

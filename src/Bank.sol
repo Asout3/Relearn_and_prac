@@ -2,22 +2,23 @@
 pragma solidity ^0.8.30;
 
 error notEnoughMoney();
-/** 
-    The Bank Contract
-Write a Solidity contract called Bank that does the following:
 
-Anyone can deposit ETH into the contract
-Users can withdraw their own ETH (only what they deposited)
-Users can check their own balance
-Owner can check the total ETH held by the contract
-
-Requirements:
-
-Track each user's balance separately
-Emit an event on deposit and on withdrawal
-No one can withdraw more than they deposited
-Use a custom error instead of a require string for the insufficient balance case
-*/
+/**
+ *     The Bank Contract
+ * Write a Solidity contract called Bank that does the following:
+ *
+ * Anyone can deposit ETH into the contract
+ * Users can withdraw their own ETH (only what they deposited)
+ * Users can check their own balance
+ * Owner can check the total ETH held by the contract
+ *
+ * Requirements:
+ *
+ * Track each user's balance separately
+ * Emit an event on deposit and on withdrawal
+ * No one can withdraw more than they deposited
+ * Use a custom error instead of a require string for the insufficient balance case
+ */
 
 /*
 okay me try to answer this question okay i will give this code to the ai so he can see my thinking process okay.
@@ -34,23 +35,23 @@ contract Bank {
     // this are my events that i declared
     // NOTE: Event naming is not correct so we got to use PascalCase; eg. Deposit, Withdraw, FallBackWasCalled.
     // so in events we don't use indexed like when we serach is we use the indexed okay.
-    event Deposit(address  indexed _user, uint256  amount);
-    event Withdraw(address  indexed _user, uint256  amount);
-    event FallBackWasCalled(address  _user, uint256  amount);
+    event Deposit(address indexed _user, uint256 amount);
+    event Withdraw(address indexed _user, uint256 amount);
+    event FallBackWasCalled(address _user, uint256 amount);
 
     // as i said i can't use array cuz it have this special thing called mapping which is cool like it puts like shit1 : shit2 so it can do that
     address public owner;
     mapping(address => uint256) public balance;
-    
+
     fallback() external payable {
         emit FallBackWasCalled(msg.sender, msg.value);
     }
+
     receive() external payable {
         balance[msg.sender] += msg.value;
         emit Deposit(msg.sender, msg.value);
     }
 
-    
     constructor() {
         owner = msg.sender;
     }
@@ -59,29 +60,28 @@ contract Bank {
         require(msg.sender == owner, "you are not owner");
         _;
     }
-    
 
     // my depostie function it accepts amount and add it to the msg sender so it is safe
     // so i was wrong the correction is like i forget about payable
-    function deposite() public payable{
+    function deposite() public payable {
         balance[msg.sender] += msg.value;
         emit Deposit(msg.sender, msg.value);
     }
 
-    // so this is witdraw function as you can see i tried to check if it does not have enough money then ya do my maths. 
-    // i got to supply the CEI check 
+    // so this is witdraw function as you can see i tried to check if it does not have enough money then ya do my maths.
+    // i got to supply the CEI check
     function withdraw(uint256 _amount) public {
-        if(_amount > balance[msg.sender]) revert notEnoughMoney(); // check 
+        if (_amount > balance[msg.sender]) revert notEnoughMoney(); // check
 
-        balance[msg.sender] -= _amount;  // effect 
+        balance[msg.sender] -= _amount; // effect
         // this .call function it is kinda good but it is not very good for existing function so like ya it is kinda low level shit i will explaint it later.
-        (bool success, ) = msg.sender.call{value: _amount}(""); // intraction
+        (bool success,) = msg.sender.call{value: _amount}(""); // intraction
         require(success, "Transfer failed");
         emit Withdraw(msg.sender, _amount);
     }
 
     // this is get function the amount of money that user have.
-    function getBalance() public view returns(uint256) {
+    function getBalance() public view returns (uint256) {
         return balance[msg.sender];
     }
 
@@ -89,6 +89,5 @@ contract Bank {
         return address(this).balance;
     }
 
-    // this is what i think and saw as fit 
-    
+    // this is what i think and saw as fit
 }

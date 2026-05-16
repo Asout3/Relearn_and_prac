@@ -22,7 +22,7 @@ Emit an event when address is added and when removed
 /*
 okay i understand this shit lets start i know like i got some naming and spelling issue but ya lets stick to the logic okay lets goooo
 i can use array for the wait list
-they can put the address and like from that list 
+they can put the address and like from that list
 you can check if you are in
 okay i understad it it is besically a loop
 okay i undersatnd.
@@ -38,7 +38,6 @@ contract Whitelist {
     event WhitelistAdded(address _address);
     event WhitelistRemoved(address _address);
     event DidSomthing();
-
 
     address public owner;
     address[] whitelisted;
@@ -58,11 +57,11 @@ contract Whitelist {
     }
 
     function addAddress(address _address) public onlyOwner {
-        if(whitelist[_address]) revert AlreadyRegistered();
+        if (whitelist[_address]) revert AlreadyRegistered();
 
         whitelist[_address] = true;
         index[_address] = whitelisted.length;
-        
+
         whitelisted.push(_address);
         whitelistedAmount++;
 
@@ -70,17 +69,16 @@ contract Whitelist {
     }
 
     function removeAddress(address _address) public onlyOwner {
-        if(!whitelist[_address]) revert NotRegistered();
+        if (!whitelist[_address]) revert NotRegistered();
 
         // okay this is kinda complicated it is besically datastructre and algorithm which says like delete the shit that you want from the array so we could use a lot of option since this is like only practice so i don't really go deep and like consider the gas optimization okay.
-        // so i will try to explain this part okay let start 
+        // so i will try to explain this part okay let start
         // what i want is like to accept the address that i want to delete and delete it how i am going to do it is like
         // first check if that address exist if not registered i will revert
         // i actually asked chatgpt how to do this shit like to put a value to the end so i can remove it but its good know.
 
-
         // get the index place of the address it could be like any where like 2 or 3 or what ever
-        uint i = index[_address];
+        uint256 i = index[_address];
         // get the last user index value like what the code does is like it gets the last user address how?
         // from the whitelisted array it find the last array and then assign its value to lastUser.
         address lastUser = whitelisted[whitelisted.length - 1];
@@ -104,7 +102,7 @@ contract Whitelist {
     }
 
     function checkIfWhitelisted(address _address) public view returns (string memory) {
-        if(whitelist[_address]){
+        if (whitelist[_address]) {
             return "you in bruv";
         } else {
             return "nah u no in it";
@@ -112,7 +110,7 @@ contract Whitelist {
     }
 
     function doSomething() public {
-        if(!whitelist[msg.sender]) revert NotRegistered();
+        if (!whitelist[msg.sender]) revert NotRegistered();
         count++;
         emit DidSomthing();
     }

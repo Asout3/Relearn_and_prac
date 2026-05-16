@@ -3,7 +3,6 @@ pragma solidity ^0.8.30;
 
 //  THIS IS FOR LEARNING PURPOSE ONLY MISTAKES AND BUGS COULD OCCURE.
 
-
 /* The question
 
 Exercise 5 — ERC20 From Scratch
@@ -28,7 +27,7 @@ Total supply set in constructor, all goes to deployer
 */
 
 /*
-so i have heared like i got to like i got this like things i will try my best and cross check it okay 
+so i have heared like i got to like i got this like things i will try my best and cross check it okay
 lets do it.
 */
 
@@ -47,7 +46,7 @@ contract Asout3Token {
     // variables here
     // owner of this contract
     uint256 public totalSupply;
-    // mapping to track balance of the user 
+    // mapping to track balance of the user
     mapping(address => uint256) public balanceOf;
     // mapping to track the allowance and the amount allowed
     mapping(address => mapping(address => uint256)) public allowance;
@@ -58,9 +57,9 @@ contract Asout3Token {
     // decimal of da token
     uint8 public decimals;
 
-    // constructor this helps like to intialize i added total supply by my self to like put it on deploy 
+    // constructor this helps like to intialize i added total supply by my self to like put it on deploy
     // so the owner gets it all i belive
-    constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _totalSupply){
+    constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _totalSupply) {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
@@ -71,16 +70,16 @@ contract Asout3Token {
     function totalSupplies() public view returns (uint256) {
         return totalSupply;
     }
-    
+
     // transfer function
     function transfer(address _to, uint256 _amount) external returns (bool) {
-        if(balanceOf[msg.sender] < _amount) revert InsufficentBalance();
+        if (balanceOf[msg.sender] < _amount) revert InsufficentBalance();
 
         balanceOf[msg.sender] -= _amount;
         balanceOf[_to] += _amount;
 
         emit Transfer(msg.sender, _to, _amount);
-        return true;  
+        return true;
     }
 
     // approve functoin
@@ -93,8 +92,8 @@ contract Asout3Token {
 
     // transfer from function
     function transferFrom(address _from, address _to, uint256 _amount) external returns (bool) {
-        if(allowance[_from][msg.sender] < _amount) revert InsufficentAllowance();
-        if(balanceOf[_from] < _amount) revert InsufficentBalance();
+        if (allowance[_from][msg.sender] < _amount) revert InsufficentAllowance();
+        if (balanceOf[_from] < _amount) revert InsufficentBalance();
 
         allowance[_from][msg.sender] -= _amount;
         balanceOf[_from] -= _amount;
@@ -106,7 +105,7 @@ contract Asout3Token {
 
     // check approval function
     function checkApproval(address _owner, address _to) external view returns (bool) {
-        if(allowance[_owner][_to] == 0) return false;
+        if (allowance[_owner][_to] == 0) return false;
 
         return true;
     }
