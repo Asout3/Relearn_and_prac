@@ -1,0 +1,27 @@
+Every time you write a contract ask these questions:
+On security:
+
+Can someone drain this contract?
+What happens if I call this function twice in the same transaction?
+Can the caller manipulate the order of transactions to their advantage?
+What happens if this external call fails or returns unexpected data?
+
+On gas:
+
+Am I reading from storage when I could use a local variable?
+Am I storing something I don't need to store?
+Can I pack these variables into one storage slot?
+Am I looping over an unbounded array?
+
+On logic:
+
+What happens if someone passes zero as an argument?
+What happens if someone passes address(0)?
+Can this overflow or underflow?
+Am I checking the right condition — or just a related one?
+
+On design:
+
+If this contract gets 10x the usage, does it break?
+Is there a simpler way to do this with fewer state variables?
+Would another developer understand this in 6 months?
