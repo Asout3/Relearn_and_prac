@@ -47,7 +47,7 @@ contract Asout3Token {
     // owner of this contract
     uint256 public totalSupply;
     // mapping to track balance of the user
-    mapping(address => uint256) public balanceOf;
+    mapping(address => uint256) private _balanceOf;
     // mapping to track the allowance and the amount allowed
     mapping(address => mapping(address => uint256)) public allowance;
     // name of the token
@@ -64,19 +64,23 @@ contract Asout3Token {
         symbol = _symbol;
         decimals = _decimals;
         totalSupply = _totalSupply;
-        balanceOf[msg.sender] = _totalSupply;
+        _balanceOf[msg.sender] = _totalSupply;
     }
 
     function totalSupplies() public view returns (uint256) {
         return totalSupply;
     }
 
+    function balanceOf(address _address) public view returns (uint256) {
+        return _balanceOf[_address];
+    }
+
     // transfer function
     function transfer(address _to, uint256 _amount) external returns (bool) {
-        if (balanceOf[msg.sender] < _amount) revert InsufficentBalance();
+        if (balanceOf(msg.sender) < _amount) revert InsufficentBalance();
 
-        balanceOf[msg.sender] -= _amount;
-        balanceOf[_to] += _amount;
+        _balanceOf[msg.sender] -= _amount;
+        _balanceOf[_to] += _amount;
 
         emit Transfer(msg.sender, _to, _amount);
         return true;
@@ -93,11 +97,11 @@ contract Asout3Token {
     // transfer from function
     function transferFrom(address _from, address _to, uint256 _amount) external returns (bool) {
         if (allowance[_from][msg.sender] < _amount) revert InsufficentAllowance();
-        if (balanceOf[_from] < _amount) revert InsufficentBalance();
+        if (balanceOf(_from) < _amount) revert InsufficentBalance();
 
         allowance[_from][msg.sender] -= _amount;
-        balanceOf[_from] -= _amount;
-        balanceOf[_to] += _amount;
+        _balanceOf[_from] -= _amount;
+        _balanceOf[_to] += _amount;
 
         emit Transfer(_from, _to, _amount);
         return true;
