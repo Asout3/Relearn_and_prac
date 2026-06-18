@@ -277,6 +277,33 @@ so the formual is like
     so user lastUpdatedTime so like we could track when was the last time updated then we gonna be able to calculate how much it need to give and do based on our formula so it is importnat
 
     so that is what i belive i need to explain next i will start the coding part and i will write as much comment and as best quility code as possible thank you.
+  
+  
+  
+  talk about this next okay do thsi and you are done  
+
+Missing piece: periodFinish
+Most real Synthetix contracts also have:
+uint256 public periodFinish;
+Why?
+Imagine:
+notifyReward(7000)
+for 7 days.
+After 30 days:
+Should rewards still accumulate?
+No.
+The reward program ended after 7 days.
+So the real implementation usually does something like:
+lastTimeRewardApplicable()
+which returns:
+min(block.timestamp, periodFinish)
+This prevents rewards from continuing forever.
+Your exercise may not require this, but it is something worth understanding.
+
+ACKNOWLEDGEMENT: THIS IS NO A PRODUCTION READY CODE THIS IS EXERCISE(EASY PROJECT) THAT I AM DOING SO EVEN THE PROROTOCOL THINGS THAT I AM TRYING TO RECREATE FROM SCRACTH
+                MIGHT NOT HAVE ALL THE FUNCTION THERE IS SO IT IS JUST EXERCISE AND ALSO THERE IS PROBABLY SOME BUGS IN IT.
+
+
   */
 
 contract StakingRewards {
@@ -314,7 +341,27 @@ contract StakingRewards {
         return rewardPerTokenStored + (rewardRate * (block.timestamp - lastUpdateTime) * 1e18 / totalStaked);
     }
 
+    // this will show much much reward a user have to claim
     function earned(address user) public view  returns (uint256) {
-
+        // i don't want to do some zero address check and non existant account check it seems gas inefficent since also it is view function not that much usefull
+        return rewards[user];
     }
+
+    function stake(uint256 amount) external {
+        // update reward state before staking
+        if (totalStaked > 0) {
+            rewardPerTokenStored += (rewardRate * (block.timestamp - lastUpdateTime) * 1e18) / totalStaked;
+        }
+        lastUpdateTime = block.timestamp;
+        // move teh current reward to the reward mapping cuz if it is updated instantly there will be some reward lost NEXTTTTTT
+        userRewardPerTokenPaid[msg.sender] = rewardPerTokenStored;
+
+        bool success  = stakingToken.transferFrom(msg.sender, address(this), amount);
+        require(success, "transaction failed");
+
+        stakedBalance[msg.sender] += amount;
+        totalStaked += amount;
+    }
+
+
 }
