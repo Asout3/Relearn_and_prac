@@ -361,10 +361,6 @@ contract StakingRewards {
 
     function stake(uint256 amount) external {
 
-        if (totalStaked > 0) {
-            rewardPerTokenStored += (rewardRate * (block.timestamp - lastUpdateTime) * 1e18) / totalStaked;
-        }
-
         updateReward(msg.sender);
 
         bool success  = stakingToken.transferFrom(msg.sender, address(this), amount);
@@ -373,5 +369,45 @@ contract StakingRewards {
         stakedBalance[msg.sender] += amount;
         totalStaked += amount;
     }
+
+    // honestly kinda forget all of this shit the final exam break make me forge most of them but i will review and like see it again i didn't totaly forget it but some of like arctectural decision are kinda shakey so like no worries i will revice it all after i finish writing it.
+    // this are the left function to build: 
+    /**
+    unstake(uint256 amount) DONE
+    claim()
+    notifyReward(uint256 amount)
+    */
+
+    function unstake(uint256 amount) external {
+        /**
+        so what do i need to do in this function:
+        i need to give back the token they have staked.
+        do i have to update i probably don't need to like send the reward moeny but i defintly need to update or clear the user reward per token stored 
+        does we need to act on nah nah we don't touch reward per token stored. 
+        */
+        require(stakedBalance[msg.sender] >= amount, "Insufficent amount"); // i know this is kinda gas inefficent but i will refactor it later
+
+        updateReward(msg.sender);
+
+        bool success  = stakingToken.transfer(msg.sender, amount);
+        require(success, "transaction failed");
+
+        stakedBalance[msg.sender] -= amount;
+        totalStaked -= amount;          
+    }
+
+    function claim() external {
+        /**
+        i think this supposed to do like claim all the reward so lets me try to set it up..
+        */
+        // i will start with updateReward
+        updateReward(msg.sender);
+
+        bool success = rewardToken.transfer(msg.sender, rewards[msg.sender]);
+        require(success, "transaction failed");
+
+        rewards[msg.sender] = 0;
+    }
+
 
 }
