@@ -374,7 +374,7 @@ contract StakingRewards {
     // this are the left function to build: 
     /**
     unstake(uint256 amount) DONE
-    claim()
+    claim() DONE
     notifyReward(uint256 amount)
     */
 
@@ -400,13 +400,17 @@ contract StakingRewards {
         /**
         i think this supposed to do like claim all the reward so lets me try to set it up..
         */
+        require(reward > 0, "No rewards"); // idk do i need this it is kinda gas inefficnet but i will probably refactor it at the end
+
+        uint256 reward = rewards[msg.sender];
+
         // i will start with updateReward
         updateReward(msg.sender);
 
-        bool success = rewardToken.transfer(msg.sender, rewards[msg.sender]);
+        bool success = rewardToken.transfer(msg.sender, reward);
         require(success, "transaction failed");
 
-        rewards[msg.sender] = 0;
+        reward = 0;
     }
 
 
