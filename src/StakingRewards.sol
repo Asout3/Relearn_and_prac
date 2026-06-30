@@ -280,7 +280,7 @@ so the formual is like
   
   
   
-  talk about this next okay do thsi and you are done  
+  talk about this next okay do this and you are done  
 
 Missing piece: periodFinish
 Most real Synthetix contracts also have:
@@ -300,7 +300,7 @@ min(block.timestamp, periodFinish)
 This prevents rewards from continuing forever.
 Your exercise may not require this, but it is something worth understanding.
 
-ACKNOWLEDGEMENT: THIS IS NO A PRODUCTION READY CODE THIS IS EXERCISE(EASY PROJECT) THAT I AM DOING SO EVEN THE PROROTOCOL THINGS THAT I AM TRYING TO RECREATE FROM SCRACTH
+ACKNOWLEDGEMENT: THIS IS NO A PRODUCTION READY CODE THIS IS EXERCISE(simple PROJECT) THAT I AM DOING SO EVEN THE PROROTOCOL THINGS THAT I AM TRYING TO RECREATE FROM SCRACTH
                 MIGHT NOT HAVE ALL THE FUNCTION THERE IS SO IT IS JUST EXERCISE AND ALSO THERE IS PROBABLY SOME BUGS IN IT.
 
 
@@ -335,26 +335,37 @@ contract StakingRewards {
     }
 
 
+    function updateReward(address user) public {
+    
+    rewardPerTokenStored = rewardPerToken();
+    lastUpdateTime = block.timestamp;
+
+    if (user != address(0)) {
+        rewards[user] = earned(user);
+        userRewardPerTokenPaid[user] = rewardPerTokenStored;
+    }
+
+    }
+
     // Returns current rewardPerTokenStored including time passed since last update
     function rewardPerToken() public view returns (uint256) {
         if(totalStaked == 0) return rewardPerTokenStored;
         return rewardPerTokenStored + (rewardRate * (block.timestamp - lastUpdateTime) * 1e18 / totalStaked);
     }
 
-    // this will show much much reward a user have to claim
-    function earned(address user) public view  returns (uint256) {
+    // this will show much reward a user have to claim
+    function earned(address user) public view returns (uint256) {
         // i don't want to do some zero address check and non existant account check it seems gas inefficent since also it is view function not that much usefull
-        return rewards[user];
+        return rewards[user] + (stakedBalance[user] * (rewardPerToken() - userRewardPerTokenPaid[user]) / 1e18);
     }
 
     function stake(uint256 amount) external {
-        // update reward state before staking
+
         if (totalStaked > 0) {
             rewardPerTokenStored += (rewardRate * (block.timestamp - lastUpdateTime) * 1e18) / totalStaked;
         }
-        lastUpdateTime = block.timestamp;
-        // move teh current reward to the reward mapping cuz if it is updated instantly there will be some reward lost NEXTTTTTT
-        userRewardPerTokenPaid[msg.sender] = rewardPerTokenStored;
+
+        updateReward(msg.sender);
 
         bool success  = stakingToken.transferFrom(msg.sender, address(this), amount);
         require(success, "transaction failed");
@@ -362,6 +373,5 @@ contract StakingRewards {
         stakedBalance[msg.sender] += amount;
         totalStaked += amount;
     }
-
 
 }
