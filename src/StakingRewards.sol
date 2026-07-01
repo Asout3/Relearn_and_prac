@@ -95,6 +95,7 @@ interface IAsout3Token {
     function transferFrom(address _from, address _to, uint256 _amount) external returns (bool);
     function transfer(address _to, uint256 _amount) external returns (bool); 
     function balanceOf(address _address) external view returns (uint256);
+    function mint(uint256 _amount, address _to) external;
 }
 
 error InsufficentAllowance();
@@ -314,7 +315,11 @@ contract StakingRewards {
     // reward math globals
     uint256 public rewardRate;           // tokens per second
     uint256 public lastUpdateTime;       // last time rewardPerToken was updated
+    uint256 public periodFinish;
     uint256 public rewardPerTokenStored; // cumulative reward per token
+    uint256 public constant sevenDays = 604800;
+    address public owner;
+
 
     // totals
     uint256 public totalStaked;
@@ -325,6 +330,7 @@ contract StakingRewards {
     mapping(address => uint256) public userRewardPerTokenPaid; // user's last checkpoint
 
     constructor(address _stakingToken) {
+        owner = msg.sender;
         stakingToken = IAsout3Token(_stakingToken);
         rewardToken = new RewardToken(
             "Reward Token",
@@ -334,8 +340,13 @@ contract StakingRewards {
         );
     }
 
+    modifier onlyOwner() {
+        require(owner == msg.sender, "you are not the owner");
+        _;
+    }
 
-    function updateReward(address user) public {
+
+    function updateReward(address user) private {
     
     rewardPerTokenStored = rewardPerToken();
     lastUpdateTime = block.timestamp;
@@ -349,8 +360,9 @@ contract StakingRewards {
 
     // Returns current rewardPerTokenStored including time passed since last update
     function rewardPerToken() public view returns (uint256) {
+        uint256 timePassed = lastTimeRewardApplicable() - lastUpdateTime;
         if(totalStaked == 0) return rewardPerTokenStored;
-        return rewardPerTokenStored + (rewardRate * (block.timestamp - lastUpdateTime) * 1e18 / totalStaked);
+        return rewardPerTokenStored + (rewardRate * timePassed * 1e18 / totalStaked);
     }
 
     // this will show much reward a user have to claim
@@ -360,7 +372,7 @@ contract StakingRewards {
     }
 
     function stake(uint256 amount) external {
-
+        require(amount > 0);
         updateReward(msg.sender);
 
         bool success  = stakingToken.transferFrom(msg.sender, address(this), amount);
@@ -385,33 +397,49 @@ contract StakingRewards {
         do i have to update i probably don't need to like send the reward moeny but i defintly need to update or clear the user reward per token stored 
         does we need to act on nah nah we don't touch reward per token stored. 
         */
+        require(amount > 0);
         require(stakedBalance[msg.sender] >= amount, "Insufficent amount"); // i know this is kinda gas inefficent but i will refactor it later
 
         updateReward(msg.sender);
 
-        bool success  = stakingToken.transfer(msg.sender, amount);
-        require(success, "transaction failed");
-
         stakedBalance[msg.sender] -= amount;
-        totalStaked -= amount;          
+        totalStaked -= amount;
+        bool success = stakingToken.transfer(msg.sender, amount);
+        require(success, "transaction failed");         
     }
 
     function claim() external {
         /**
         i think this supposed to do like claim all the reward so lets me try to set it up..
         */
-        require(reward > 0, "No rewards"); // idk do i need this it is kinda gas inefficnet but i will probably refactor it at the end
-
-        uint256 reward = rewards[msg.sender];
-
         // i will start with updateReward
         updateReward(msg.sender);
-
+        uint256 reward = rewards[msg.sender];
+        rewards[msg.sender] = 0; // effect first
         bool success = rewardToken.transfer(msg.sender, reward);
         require(success, "transaction failed");
-
-        reward = 0;
     }
+
+    function notifyReward(uint256 amount) external onlyOwner {
+        require(amount > 0);
+        updateReward(address(0));
+
+        rewardToken.mint(amount, address(this));
+        
+
+        rewardRate = amount / sevenDays;
+        lastUpdateTime = block.timestamp;
+        periodFinish = block.timestamp + sevenDays;
+    } 
+
+    function lastTimeRewardApplicable() public view returns (uint256) {
+        if (block.timestamp < periodFinish)
+            return block.timestamp;
+        else
+            return periodFinish;
+    }
+
+
 
 
 }
