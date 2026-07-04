@@ -232,6 +232,10 @@ okay lets start i want to start with the requirements and i will write like how 
 
      to clear up it means you give up tokenA to get tokenB so ya.
      so as you can this like this is the swap for changing A for B and at this time the reserve of tokenA will increase so i have to deals with also like i don't know is there things that i have to deal with let me thing so i will probabaly came to it when i write the code
+        Pull amountIn of tokenA from the user via transferFrom
+        Send amountOut of tokenB to the user via transfer
+        Update both reserves — reserveA += amountIn and reserveB -= amountOut
+ 
  5. swapBforA(uint256 amountIn) → swaps tokenB for tokenA :- this is the same as like before but different formula here is the formula:
 
                                             amountOut = (reserveA * amountIn) / (reserveB + amountIn)
