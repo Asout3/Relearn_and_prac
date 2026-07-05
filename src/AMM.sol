@@ -365,6 +365,8 @@ contract LP{
 
 error InsufficientLiquidity();
 error CantDoZeroAmounts();
+error InsufficientTokenA();
+error InsufficientTokenB();
 
 contract AMM {
 
@@ -445,7 +447,7 @@ contract AMM {
         if(_amountTokenA == 0) revert CantDoZeroAmounts();
         if(tokenA.balanceOf(msg.sender) < _amountTokenA) revert InsufficientTokenA();
 
-        uint256 amountOut = (reserveB * _amountTokenA) / (reserveA + _amountTokenA)
+        uint256 amountOut = (reserveB * _amountTokenA) / (reserveA + _amountTokenA);
 
         bool success1 = tokenA.transferFrom(msg.sender, address(this), _amountTokenA);
         require(success1, "transfer failed");
@@ -455,6 +457,23 @@ contract AMM {
         require(success2, "transfer failed");
         reserveB -= amountOut;
     }
+
+    function swapBforA(uint256 _amountTokenB) external {
+        if(_amountTokenB == 0) revert CantDoZeroAmounts();
+        if(tokenB.balanceOf(msg.sender) < _amountTokenB) revert InsufficientTokenB();
+
+        uint256 amountOut = (reserveA * _amountTokenB) / (reserveB + _amountTokenB);
+
+        bool success1 = tokenB.transferFrom(msg.sender, address(this), _amountTokenB);
+        require(success1, "transfer failed");
+        reserveB += _amountTokenB;
+
+        bool success2 = tokenA.transfer(msg.sender, amountOut);
+        require(success2, "transfer failed");
+        reserveA -= amountOut;
+    }
+
+
 
 
 
