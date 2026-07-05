@@ -257,18 +257,11 @@ okay lets start i want to start with the requirements and i will write like how 
 // lets start!!
 
 // these are the interface of token the i will recive.
-interface token_A {
+interface IERC20 {
     function transferFrom(address _from, address _to, uint256 _amount) external returns (bool);
     function transfer(address _to, uint256 _amount) external returns (bool); 
     function balanceOf(address _address) external view returns (uint256);
 }
-
-interface token_B {
-    function transferFrom(address _from, address _to, uint256 _amount) external returns (bool);
-    function transfer(address _to, uint256 _amount) external returns (bool); 
-    function balanceOf(address _address) external view returns (uint256);
-}
-
 
 // this is the LP token.
 
@@ -366,15 +359,15 @@ error CantDoZeroAmounts();
 
 contract AMM {
 
-    token_A public tokenA;
-    token_B public tokenB;
+    IERC20 public tokenA;
+    IERC20 public tokenB;
     LP public lpToken;
 
 
 
     constructor(address _tokenA, address _tokenB) {
-        tokenA = token_A(_tokenA);
-        tokenB = token_B(_tokenB);
+        tokenA = IERC20(_tokenA);
+        tokenB = IERC20(_tokenB);
         lpToken = new LP(
             "liqudity provider token",
             "LP",
@@ -393,6 +386,7 @@ contract AMM {
 
 
     function addLiquidity(uint256 _amountA, uint256 _amountB) external {
+        if(_amountA == 0 || _amountB == 0) revert CantDoZeroAmounts();
         //so i think this is the one where the user will add liquidity and in thier putting liqudity they will recive LP token.
         // what i need to do is like pull the tokens then store it in this contract then pull, add, mint, then recorde
         uint256 share; // this is besically the lp token okay don't get confused.
@@ -406,15 +400,14 @@ contract AMM {
                             );
         }
 
-        bool success1 = tokenA.transferFrom(msg.sender, address(this), _amountA);
-        require(success1, "transaction failed");
-
-        bool success2 = tokenB.transferFrom(msg.sender, address(this), _amountB);
-        require(success2, "transaction failed");
-
         reserveA += _amountA;
         reserveB += _amountB;
 
+        bool success1 = tokenA.transferFrom(msg.sender, address(this), _amountA);
+        require(success1, "transaction failed");
+        bool success2 = tokenB.transferFrom(msg.sender, address(this), _amountB);
+        require(success2, "transaction failed");
+        
         lpToken.mint(share, msg.sender);
     }
 
@@ -443,13 +436,15 @@ contract AMM {
 
         uint256 amountOut = (reserveB * _amountTokenA) / (reserveA + _amountTokenA);
 
+        reserveA += _amountTokenA;
+        reserveB -= amountOut;
+
+
         bool success1 = tokenA.transferFrom(msg.sender, address(this), _amountTokenA);
         require(success1, "transfer failed");
-        reserveA += _amountTokenA;
-
+     
         bool success2 = tokenB.transfer(msg.sender, amountOut);
         require(success2, "transfer failed");
-        reserveB -= amountOut;
     }
 
     function swapBforA(uint256 _amountTokenB) external {
@@ -457,13 +452,15 @@ contract AMM {
 
         uint256 amountOut = (reserveA * _amountTokenB) / (reserveB + _amountTokenB);
 
+        reserveB += _amountTokenB;
+        reserveA -= amountOut;
+
+
         bool success1 = tokenB.transferFrom(msg.sender, address(this), _amountTokenB);
         require(success1, "transfer failed");
-        reserveB += _amountTokenB;
-
+       
         bool success2 = tokenA.transfer(msg.sender, amountOut);
         require(success2, "transfer failed");
-        reserveA -= amountOut;
     }
 
 
@@ -490,3 +487,9 @@ contract AMM {
     }
 
 }
+
+/**
+ *this one is easier i swear ya too around 2hr and like i didn't even use ai honestly but ya way to go learned some shits. 
+ * 
+ * 
+*/
