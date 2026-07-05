@@ -441,6 +441,21 @@ contract AMM {
         reserveB -= amountB;
     }
 
+    function swapAforB(uint256 _amountTokenA) external {
+        if(_amountTokenA == 0) revert CantDoZeroAmounts();
+        if(tokenA.balanceOf(msg.sender) < _amountTokenA) revert InsufficientTokenA();
+
+        uint256 amountOut = (reserveB * _amountTokenA) / (reserveA + _amountTokenA)
+
+        bool success1 = tokenA.transferFrom(msg.sender, address(this), _amountTokenA);
+        require(success1, "transfer failed");
+        reserveA += _amountTokenA;
+
+        bool success2 = tokenB.transfer(msg.sender, amountOut);
+        require(success2, "transfer failed");
+        reserveB -= amountOut;
+    }
+
 
 
 
