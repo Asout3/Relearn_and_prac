@@ -261,14 +261,12 @@ interface token_A {
     function transferFrom(address _from, address _to, uint256 _amount) external returns (bool);
     function transfer(address _to, uint256 _amount) external returns (bool); 
     function balanceOf(address _address) external view returns (uint256);
-    function mint(uint256 _amount, address _to) external;
 }
 
 interface token_B {
     function transferFrom(address _from, address _to, uint256 _amount) external returns (bool);
     function transfer(address _to, uint256 _amount) external returns (bool); 
     function balanceOf(address _address) external view returns (uint256);
-    function mint(uint256 _amount, address _to) external;
 }
 
 
@@ -365,8 +363,6 @@ contract LP{
 
 error InsufficientLiquidity();
 error CantDoZeroAmounts();
-error InsufficientTokenA();
-error InsufficientTokenB();
 
 contract AMM {
 
@@ -394,8 +390,6 @@ contract AMM {
 
     uint256 public reserveA;
     uint256 public reserveB;
-    uint256 public pool = reserveA + reserveB;
-
 
 
     function addLiquidity(uint256 _amountA, uint256 _amountB) external {
@@ -403,15 +397,7 @@ contract AMM {
         // what i need to do is like pull the tokens then store it in this contract then pull, add, mint, then recorde
         uint256 share; // this is besically the lp token okay don't get confused.
 
-        bool success1 = tokenA.transferFrom(msg.sender, address(this), _amountA);
-        require(success1, "transaction failed");
-        reserveA += _amountA;
-
-        bool success2 = tokenB.transferFrom(msg.sender, address(this), _amountB);
-        require(success2, "transaction failed");
-        reserveB += _amountB;
-
-        if(pool == 0) { // fix here the condition won't work okay.
+        if(lpToken.totalSupplies() == 0) { 
             share = sqrt(_amountA * _amountB);
         } else {
             share = min(
@@ -419,6 +405,15 @@ contract AMM {
                                 (_amountB * lpToken.totalSupplies()) / reserveB
                             );
         }
+
+        bool success1 = tokenA.transferFrom(msg.sender, address(this), _amountA);
+        require(success1, "transaction failed");
+
+        bool success2 = tokenB.transferFrom(msg.sender, address(this), _amountB);
+        require(success2, "transaction failed");
+
+        reserveA += _amountA;
+        reserveB += _amountB;
 
         lpToken.mint(share, msg.sender);
     }
@@ -445,7 +440,6 @@ contract AMM {
 
     function swapAforB(uint256 _amountTokenA) external {
         if(_amountTokenA == 0) revert CantDoZeroAmounts();
-        if(tokenA.balanceOf(msg.sender) < _amountTokenA) revert InsufficientTokenA();
 
         uint256 amountOut = (reserveB * _amountTokenA) / (reserveA + _amountTokenA);
 
@@ -460,7 +454,6 @@ contract AMM {
 
     function swapBforA(uint256 _amountTokenB) external {
         if(_amountTokenB == 0) revert CantDoZeroAmounts();
-        if(tokenB.balanceOf(msg.sender) < _amountTokenB) revert InsufficientTokenB();
 
         uint256 amountOut = (reserveA * _amountTokenB) / (reserveB + _amountTokenB);
 
@@ -472,12 +465,6 @@ contract AMM {
         require(success2, "transfer failed");
         reserveA -= amountOut;
     }
-
-
-
-
-
-
 
 
 
@@ -501,9 +488,5 @@ contract AMM {
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
         return a < b ? a : b;
     }
-
-
-
-   
 
 }
