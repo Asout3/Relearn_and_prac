@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
+/**
 
    █████████   ██████   ██████ ██████   ██████
   ███░░░░░███ ░░██████ ██████ ░░██████ ██████ 
@@ -11,7 +12,7 @@ pragma solidity ^0.8.30;
  █████   █████ █████     █████ █████     █████
 ░░░░░   ░░░░░ ░░░░░     ░░░░░ ░░░░░     ░░░░░ 
                                               
-                                              
+*/                                             
                                               
 /**
     This is the exercise and the question that i asked:
@@ -60,7 +61,7 @@ Custom errors for zero amounts, insufficient liquidity, insufficient output
 
 
 Solidity has no built-in square root — use this standard implementation for the first LP deposit:
-solidityfunction sqrt(uint256 y) internal pure returns (uint256 z) {
+function sqrt(uint256 y) internal pure returns (uint256 z) {
     if (y > 3) {
         z = y;
         uint256 x = y / 2 + 1;
@@ -168,10 +169,10 @@ shares = min(
 
 Requirements:
 
-Two token interfaces
-addLiquidity(uint256 amountA, uint256 amountB) → mints LP shares
-removeLiquidity(uint256 shares) → burns shares, returns tokens
-swapAforB(uint256 amountIn) → swaps tokenA for tokenB
+Two token interfaces = DONE
+addLiquidity(uint256 amountA, uint256 amountB) → mints LP shares = DONE
+removeLiquidity(uint256 shares) → burns shares, returns tokens = DONE
+swapAforB(uint256 amountIn) → swaps tokenA for tokenB 
 swapBforA(uint256 amountIn) → swaps tokenB for tokenA
 Track reserveA and reserveB as state variables
 Custom errors for zero amounts, insufficient liquidity, insufficient output
@@ -252,3 +253,223 @@ okay lets start i want to start with the requirements and i will write like how 
 
 
 */
+
+// lets start!!
+
+// these are the interface of token the i will recive.
+interface token_A {
+    function transferFrom(address _from, address _to, uint256 _amount) external returns (bool);
+    function transfer(address _to, uint256 _amount) external returns (bool); 
+    function balanceOf(address _address) external view returns (uint256);
+    function mint(uint256 _amount, address _to) external;
+}
+
+interface token_B {
+    function transferFrom(address _from, address _to, uint256 _amount) external returns (bool);
+    function transfer(address _to, uint256 _amount) external returns (bool); 
+    function balanceOf(address _address) external view returns (uint256);
+    function mint(uint256 _amount, address _to) external;
+}
+
+
+// this is the LP token.
+
+error InsufficentAllowance();
+error InsufficentBalance();
+
+contract LP{
+
+    event Transfer(address indexed sender, address indexed receiver, uint256 amount);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
+    uint256 public totalSupply; // total share.
+    mapping(address => uint256) private _balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
+    string public name;
+    string public symbol;
+    uint8 public decimals;
+    address public owner;
+
+    constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _totalSupply) {
+        name = _name;
+        symbol = _symbol;
+        decimals = _decimals;
+        totalSupply = _totalSupply;
+        owner = msg.sender;
+    }
+
+    function totalSupplies() external view returns (uint256) {
+        return totalSupply;
+    }
+    function balanceOf(address _address) external view returns (uint256) {
+        return _balanceOf[_address];
+    }
+
+    function mint(uint256 _amount, address _to) external {
+        require(owner == msg.sender, "you are not the owner of this token");
+        totalSupply += _amount;
+        _balanceOf[_to] += _amount;
+    }
+
+    function burn(address _from, uint256 _amount) external {
+        require(owner == msg.sender, "not owner");
+        require(_balanceOf[_from] >= _amount, "insufficient");
+        _balanceOf[_from] -= _amount;
+        totalSupply -= _amount;
+    }
+
+    function transfer(address _to, uint256 _amount) external returns (bool) {
+        if (_balanceOf[msg.sender] < _amount) revert InsufficentBalance();
+
+        _balanceOf[msg.sender] -= _amount;
+        _balanceOf[_to] += _amount;
+
+        emit Transfer(msg.sender, _to, _amount);
+        return true;
+    }
+
+    function approve(address _spender, uint256 _amount) external returns (bool) {
+        allowance[msg.sender][_spender] = _amount;
+
+        emit Approval(msg.sender, _spender, _amount);
+        return true;
+    }
+
+    function transferFrom(address _from, address _to, uint256 _amount) external returns (bool) {
+        if (allowance[_from][msg.sender] < _amount) revert InsufficentAllowance();
+        if (_balanceOf[_from] < _amount) revert InsufficentBalance();
+
+        allowance[_from][msg.sender] -= _amount;
+        _balanceOf[_from] -= _amount;
+        _balanceOf[_to] += _amount;
+
+        emit Transfer(_from, _to, _amount);
+        return true;
+    }
+
+    function checkApproval(address _owner, address _to) external view returns (bool) {
+        if (allowance[_owner][_to] == 0) return false;
+
+        return true;
+    }
+}
+
+// okay done i have implemented all the tokens that i needed lets pass to the next part.
+// now let me setup the constructors for the tokens then i will be doing the state varaibles.
+// now i have to deal with the state variables which is like the hardest part honestly so getting them all might require soem shit but lets do it first i will try to collect from the notes.
+/**
+ * reserveA and reserveB
+ * amount of LP token a user holds it is mapping okay 
+ *
+*/
+
+error InsufficientLiquidity();
+error CantDoZeroAmounts();
+
+contract AMM {
+
+    token_A public tokenA;
+    token_B public tokenB;
+    LP public lpToken;
+
+
+
+    constructor(address _tokenA, address _tokenB) {
+        tokenA = token_A(_tokenA);
+        tokenB = token_B(_tokenB);
+        lpToken = new LP(
+            "liqudity provider token",
+            "LP",
+            18,
+            0
+            );
+
+    }
+
+//////////////////////////////////////////////////////////
+//                  state variables                    //
+////////////////////////////////////////////////////////
+
+    uint256 public reserveA;
+    uint256 public reserveB;
+    uint256 public pool = reserveA + reserveB;
+
+
+
+    function addLiquidity(uint256 _amountA, uint256 _amountB) external {
+        //so i think this is the one where the user will add liquidity and in thier putting liqudity they will recive LP token.
+        // what i need to do is like pull the tokens then store it in this contract then pull, add, mint, then recorde
+        uint256 share; // this is besically the lp token okay don't get confused.
+
+        bool success1 = tokenA.transferFrom(msg.sender, address(this), _amountA);
+        require(success1, "transaction failed");
+        reserveA += _amountA;
+
+        bool success2 = tokenB.transferFrom(msg.sender, address(this), _amountB);
+        require(success2, "transaction failed");
+        reserveB += _amountB;
+
+        if(pool == 0) { // fix here the condition won't work okay.
+            share = sqrt(_amountA * _amountB);
+        } else {
+            share = min(
+                                (_amountA * lpToken.totalSupplies()) / reserveA,
+                                (_amountB * lpToken.totalSupplies()) / reserveB
+                            );
+        }
+
+        lpToken.mint(share, msg.sender);
+    }
+
+    function removeLiquidity(uint256 _shares) external {
+        if(_shares == 0) revert CantDoZeroAmounts();
+        if(lpToken.balanceOf(msg.sender) < _shares) revert InsufficientLiquidity();
+
+        //this is the real formula: amountA = (shares × reserveA) / totalShares  and
+        // amountB = (shares × reserveB) / totalShares
+        uint256 amountA = (_shares * reserveA) / lpToken.totalSupplies();
+        uint256 amountB = (_shares * reserveB) / lpToken.totalSupplies();
+
+        lpToken.burn(msg.sender, _shares);
+
+        bool success1 = tokenA.transfer(msg.sender, amountA);
+        require(success1, "transfer failed");
+        reserveA -= amountA;
+
+        bool success2 = tokenB.transfer(msg.sender, amountB);
+        require(success2, "transfer failed");
+        reserveB -= amountB;
+    }
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////
+//                  Helper functions                   //
+/////////////////////////////////////////////////////////
+
+    function sqrt(uint256 y) internal pure returns (uint256 z) {
+        if (y > 3) {
+            z = y;
+            uint256 x = y / 2 + 1;
+            while (x < z) {
+                z = x;
+                x = (y / x + x) / 2;
+            }
+        } else if (y != 0) {
+            z = 1;
+        }
+    }
+
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a < b ? a : b;
+    }
+
+
+
+   
+
+}
