@@ -120,8 +120,51 @@ contract FlashLender {
    * @dev this flashFee function is customized by my self the original flashFee function have like token address and it checks if that token address is allowed but for this exercise i only do calculate the amount and i don't check the token address i dont even ask for toekn address.
    * @dev i did 1000 because we are asked 0.3% so since solidity doesn't have decimal if i devide it by 1000 it could get the wanted 0.3%.
    */ 
-  function flahsFee(uint256 _amount) external view returns (uint256) {
+
+  bytes32 public constant CALLBACK_SUCCESS = keccak256("FlashBorrower.onFlashLoan");
+
+
+  function flashFee(uint256 _amount) internal view returns (uint256) {
     return (_amount * 3) / 1000; 
   }
+
+  function flashLoan(
+    address _receiver,
+    address _token,
+    uint256 _amount,
+    bytes calldata data
+    ) external returns(bool) {
+    // in the real one they check for the acceptability of the token like do they offer that token but i will not do that.
+
+    uint256 beforeBalance = IERC20(_token).balanceOf(address(this));
+
+    uint256 fee = flashFee(_amount);
+
+    require(IERC20(_token).transfer(_receiver, _amount), "Transfer Failed!");
+
+    // this is the standard way of checking if the callback successfully finished for the erc3156 docs
+    require(_receiver.onFlashLoan(msg.sender, _token, _amount, fee, data) == CALLBACK_SUCCESS,
+            "FlashLender: Callback failed");
+
+    require(IERC20(_token).transferFrom(_receiver, address(this), _amount + fee), "Reciving failed");
+
+    /**
+     * 
+     * here is the checking as ordered but this is not standard i just put it in the contract cuz the exercise asked it
+     * i recomend removing it cuz i already force them to return with the fee right so ya the are also costy in terms of gas and also redundent.
+     */
+    uint256 afterBalance = IERC20(_token).balanceOf(address(this));
+    require(afterBalance >= beforeBalance, "you paid less");
+
+    return true;
+  }
+
+}
+
+
+// as i said there will be some customization so i will try my best looking look like the original erc3156.
+contract flashBorrower {
+
+  // so the time is up we were on good progress and i want you to do like read the eip and continue from there we are about to almost finish okay.
 
 }
