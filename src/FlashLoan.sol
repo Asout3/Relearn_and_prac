@@ -136,7 +136,7 @@ contract FlashLender {
     ) external returns(bool) {
     // in the real one they check for the acceptability of the token like do they offer that token but i will not do that.
 
-    flashBorrower Receiver;    
+    flashBorrower Receiver = flashBorrower(_receiver);
 
     uint256 beforeBalance = IERC20(_token).balanceOf(address(this));
 
@@ -203,7 +203,7 @@ contract flashBorrower {
       // do even other shit
     }
 
-    return keccak256("flashBorrower.onFlashLoan");
+    return keccak256("FlashBorrower.onFlashLoan");
   }
 
   function flashloan(
@@ -212,10 +212,10 @@ contract flashBorrower {
     ) public {
 
     bytes memory data = abi.encode(Action.Normal);
-    uint256 _allowance = IERC20(token).allowance(address(this), lender );
+    uint256 _allowance = IERC20(token).allowance(address(this), address(lender) );
     uint256 _fee = lender.flashFee(amount);
     uint256 _repayment = amount + _fee;
-    IERC20(token).approve(lender, _repayment);
+    IERC20(token).approve(address(lender), _repayment);
     lender.flashLoan(address(this), token, amount, data);
 
   }
