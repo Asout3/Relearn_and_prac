@@ -121,6 +121,9 @@ contract FlashLender {
    * @dev i did 1000 because we are asked 0.3% so since solidity doesn't have decimal if i devide it by 1000 it could get the wanted 0.3%.
    */ 
 
+   event FlashLoanIsIssued(address indexed to, uint256 indexed amount);
+   event FlashLoanIsPaid(address indexed from, uint256 indexed amount);
+
   bytes32 public constant CALLBACK_SUCCESS = keccak256("FlashBorrower.onFlashLoan");
 
 
@@ -144,6 +147,8 @@ contract FlashLender {
 
     require(IERC20(_token).transfer(_receiver, _amount), "Transfer Failed!");
 
+    emit FlashLoanIsIssued(_receiver, _amount);
+
     // this is the standard way of checking if the callback successfully finished for the erc3156 docs
     require(Receiver.onFlashLoan(msg.sender, _token, _amount, fee, data) == CALLBACK_SUCCESS,
             "FlashLender: Callback failed");
@@ -157,6 +162,8 @@ contract FlashLender {
      */
     uint256 afterBalance = IERC20(_token).balanceOf(address(this));
     require(afterBalance >= beforeBalance, "you paid less");
+
+    emit FlashLoanIsPaid(_receiver, _amount + fee);
 
     return true;
   }
