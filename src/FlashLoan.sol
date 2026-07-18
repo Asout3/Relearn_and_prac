@@ -124,7 +124,7 @@ contract FlashLender {
   bytes32 public constant CALLBACK_SUCCESS = keccak256("FlashBorrower.onFlashLoan");
 
 
-  function flashFee(uint256 _amount) internal view returns (uint256) {
+  function flashFee(uint256 _amount) public view returns (uint256) {
     return (_amount * 3) / 1000; 
   }
 
@@ -136,6 +136,8 @@ contract FlashLender {
     ) external returns(bool) {
     // in the real one they check for the acceptability of the token like do they offer that token but i will not do that.
 
+    flashBorrower Receiver;    
+
     uint256 beforeBalance = IERC20(_token).balanceOf(address(this));
 
     uint256 fee = flashFee(_amount);
@@ -143,7 +145,7 @@ contract FlashLender {
     require(IERC20(_token).transfer(_receiver, _amount), "Transfer Failed!");
 
     // this is the standard way of checking if the callback successfully finished for the erc3156 docs
-    require(_receiver.onFlashLoan(msg.sender, _token, _amount, fee, data) == CALLBACK_SUCCESS,
+    require(Receiver.onFlashLoan(msg.sender, _token, _amount, fee, data) == CALLBACK_SUCCESS,
             "FlashLender: Callback failed");
 
     require(IERC20(_token).transferFrom(_receiver, address(this), _amount + fee), "Reciving failed");
@@ -165,6 +167,57 @@ contract FlashLender {
 // as i said there will be some customization so i will try my best looking look like the original erc3156.
 contract flashBorrower {
 
-  // so the time is up we were on good progress and i want you to do like read the eip and continue from there we are about to almost finish okay.
+  enum Action{Normal, Other}
+
+  FlashLender lender;
+
+  constructor(address _lender) {
+    lender = FlashLender(_lender);
+  }
+
+  function onFlashLoan(
+    address initiator,
+    address token,
+    uint256 amount,
+    uint256 fee,
+    bytes calldata data
+    ) external returns(bytes32) {
+
+    require(
+      msg.sender == address(lender),
+      "untrusted lender"
+      );
+
+    require(
+      initiator == address(this),
+      "untrusted intiator"
+      );
+
+    (Action action) = abi.decode(data, (Action));
+
+    if(action == Action.Normal){
+      // do somthing
+    } else if(action == Action.Other){
+      // do other thing
+    } else {
+      // do even other shit
+    }
+
+    return keccak256("flashBorrower.onFlashLoan");
+  }
+
+  function flashloan(
+    address token,
+    uint256 amount
+    ) public {
+
+    bytes memory data = abi.encode(Action.Normal);
+    uint256 _allowance = IERC20(token).allowance(address(this), lender );
+    uint256 _fee = lender.flashFee(amount);
+    uint256 _repayment = amount + _fee;
+    IERC20(token).approve(lender, _repayment);
+    lender.flashLoan(address(this), token, amount, data);
+
+  }
 
 }
