@@ -13,6 +13,14 @@ pragma solidity ^0.8.34;
 */
 
 /*
+   THIS IS NOT PRODUCTION CODE AND IT IS SO GAS INEFFICENT AND IT MIGHT HAVE BUGS OR WHAT EVER IT IS JUST 
+   EXERCISE OKAY FOR PRACTICE OKAY THAT IS IT AND I THINK I LEARNED SOME OUT OF IT. I JUST TIRED TO COMPLETE
+   THE REQUIREMENTS AND SO YA I LOVED IT GOOD PROGRESS AND I AM GOING TO KEEP WORKING ON HARDER EXERCISE AND PROJECTS.
+
+*/
+
+
+/*
    THIS ARE THE QUETSION AND THE EXPLANATION OF WHAT I NEED TO DO AND I WILL BE ACTING BASED ON IT OKAY.
 
 
@@ -171,7 +179,7 @@ okay i think i tried to answer the question and i have function and shit so like
 
 error AlreadyVoted();
 error VotingNotActive();
-error proposalNotSuccessful();
+error ProposalNotSuccessful();
 error TimeLockNotPassed();
 
 interface IERC20 {
@@ -262,6 +270,10 @@ contract Governor {
         } else if (proposals[proposalId].votesFor + proposals[proposalId].votesAgainst < QUORUM) {
             return ProposalState.Defeated;
         } else if (proposals[proposalId].votesFor > proposals[proposalId].votesAgainst) {
+            if (block.timestamp < proposals[proposalId].endTime + TIMELOCK_DELAY) {
+                return ProposalState.Queued;
+            }
+
             return ProposalState.Succeeded;
         } else {
             return ProposalState.Defeated;
@@ -285,9 +297,10 @@ contract Governor {
     }
 
     function execute(uint256 proposalId) public {
-        if (state(proposalId) != ProposalState.Succeeded) revert proposalNotSuccessful();
+        if (state(proposalId) != ProposalState.Succeeded) revert ProposalNotSuccessful();
         require(!proposals[proposalId].executed, "its already executed");
-        if (block.timestamp < proposals[proposalId].endTime + TIMELOCK_DELAY) revert TimeLockNotPassed();
+        // i comment this one out because it is the one who got to get out cuz you know like we don't have to use block.timestamp so i remove it i know i use a lot of time in this exercise but they were nessasary so like i got no option so like ya that is why.
+        //if (block.timestamp < proposals[proposalId].endTime + TIMELOCK_DELAY) revert TimeLockNotPassed();
 
         Proposal storage p = proposals[proposalId];
 
