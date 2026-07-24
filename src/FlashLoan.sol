@@ -219,7 +219,7 @@ contract flashBorrower {
     ) public {
 
     bytes memory data = abi.encode(Action.Normal);
-    uint256 _allowance = IERC20(token).allowance(address(this), address(lender) );
+    //uint256 _allowance = IERC20(token).allowance(address(this), address(lender) );
     uint256 _fee = lender.flashFee(amount);
     uint256 _repayment = amount + _fee;
     IERC20(token).approve(address(lender), _repayment);
