@@ -169,6 +169,11 @@ okay i think i tried to answer the question and i have function and shit so like
 
 */
 
+error AlreadyVoted();
+error VotingNotActive();
+error proposalNotSuccessful();
+error TimeLockNotPassed();
+
 interface IERC20 {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
@@ -191,10 +196,12 @@ contract Governor {
 
     uint256 public currentID = 1;
     uint256 public constant VOTING_PERIOD = 259200;
+    uint256 public constant TIMELOCK_DELAY = 172800;
+    uint256 public constant QUORUM = 100e18;
     uint256 public constant MAX_DESCRIPTION_LENGTH = 512;
 
     mapping(uint256 => Proposal) public proposals;
-    mapping(uint256 => (address => bool)) public has voted;
+    mapping(uint256 => mapping(address => bool)) public hasVoted;
 
     enum ProposalState {
         Pending,
@@ -240,20 +247,53 @@ contract Governor {
             endTime: endingTime,
             executed: false
         });
-        hasVoted[currentID][msg.sender] = true;
         currentID++;
-
-        ProposalState state = ProposalState.Active;
 
         //i am going to emit an event
         // i need to also add some important datas right so okay i will be back at it.
         emit ProposalCreated(target, callData, description);
     }
 
+    function state(uint256 proposalId) public view returns (ProposalState) {
+        if (proposals[proposalId].executed) {
+            return ProposalState.Executed;
+        } else if (block.timestamp < proposals[proposalId].endTime) {
+            return ProposalState.Active;
+        } else if (proposals[proposalId].votesFor + proposals[proposalId].votesAgainst < QUORUM) {
+            return ProposalState.Defeated;
+        } else if (proposals[proposalId].votesFor > proposals[proposalId].votesAgainst) {
+            return ProposalState.Succeeded;
+        } else {
+            return ProposalState.Defeated;
+        }
+    }
+
     function vote(uint256 proposalId, bool support) external {
-      require(!hasvoted[proposalId][msg.sender], "already Voted");
-      require(state = 1, "closed voting window")
+        require(IERC20(token).balanceOf(msg.sender) > 0, "You don't have enough power to vote");
+        if (hasVoted[proposalId][msg.sender]) revert AlreadyVoted();
+        if (state(proposalId) != ProposalState.Active) revert VotingNotActive();
 
+        uint256 weight = IERC20(token).balanceOf(msg.sender);
 
+        if (support) {
+            proposals[proposalId].votesFor += weight;
+        } else {
+            proposals[proposalId].votesAgainst += weight;
+        }
+
+        hasVoted[proposalId][msg.sender] = true;
+    }
+
+    function execute(uint256 proposalId) public {
+        if (state(proposalId) != ProposalState.Succeeded) revert proposalNotSuccessful();
+        require(!proposals[proposalId].executed, "its already executed");
+        if (block.timestamp < proposals[proposalId].endTime + TIMELOCK_DELAY) revert TimeLockNotPassed();
+
+        Proposal storage p = proposals[proposalId];
+
+        proposals[proposalId].executed = true;
+
+        (bool success,) = p.target.call(p.callData);
+        require(success, "failed executing");
     }
 }
