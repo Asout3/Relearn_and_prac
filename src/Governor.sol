@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.30
+pragma solidity ^0.8.34;
 
 /*
 
-   ____                                      
-  / ___| _____   _____ _ __ _ __   ___  _ __ 
+   ____
+  / ___| _____   _____ _ __ _ __   ___  _ __
  | |  _ / _ \ \ / / _ \ '__| '_ \ / _ \| '__|
- | |_| | (_) \ V /  __/ |  | | | | (_) | |   
-  \____|\___/ \_/ \___|_|  |_| |_|\___/|_|                                                
+ | |_| | (_) \ V /  __/ |  | | | | (_) | |
+  \____|\___/ \_/ \___|_|  |_| |_|\___/|_|
 
 
 */
@@ -128,15 +128,132 @@ What "quorum" means concretely:
 Just pick a number, like "10% of total token supply must vote" or a flat number like "1000 tokens worth of votes minimum." Store it as a state variable, check against votesFor + votesAgainst when determining if a proposal succeeded.
 */
 
-
 /*
 
 alright lets continue this is where i reason right so like i will do my shit here so as i always do no coding before have clear thing in my mind i need to reason it correctly and answer all question that comes to my mind.
 i will start with reading the question and explanation carefully.
 
+
+so as you can see it is kinda long insturction and shit right fuck this shit right so let me try to answer on the like things that i need to do and like also the requirements let me answer on them.
+
+- Uses an ERC20 token for voting power — 1 token = 1 vote:
+  i will add an erc20 interface and use it as a voting power this is easy.
+
+- Anyone holding tokens can create a proposal — target address, calldata to execute, description:
+  okay this one is also easy i will try to do like need token to propose and like in the function i will accept that right.
+
+- Anyone holding tokens can vote for or against a proposal — voting power based on their token balance:
+   so i think like the voter need to know on what topic they are voting so like i need to find a way to notify them or make them pick on what they are voting or like does it work like one proposal at a time like i can do like create a proposal id and the voter can put it also then vote on that id right what else there is.
+
+- A proposal needs a quorum (minimum total votes) and more for-votes than against to pass:
+   do i need to like create a general one for the all dao or like on every proposal but i think it should be a general that is hwo it supposed to be
+
+- A proposal needs a quorum (minimum total votes) and more for-votes than against to pass:
+   okay will do that no worreis
+
+- If a proposal passes, there's a timelock delay — e.g. 2 days — before it can be executed:
+   okay i will make sure i will do that in the function.
+
+- Anyone can execute a passed proposal after the timelock, which calls the target contract with the calldata
+  mmmm... wait let me resreach on that.
+
+
+
+okay lets continue.
+
+what do you think i should do i belive i got to do this one like i got this one no need for other right so yes no worries
+so how am i gonig to write the contract as i said i am going to start with like planning i don't start with writing so i try to answer all question which i did at some point no worries like
+in writing, developing or designing, or creating arctecture so you start with the plan and question and you try to answer the question that is you wrote or get and read docs or what ever you got and u can build from that i think it is also good way of seeing it answering all the question makes it easier cuz you know you will have full information about what you are going to build fully understand it then you write the contract as i said before writing the contract is like the second part write if you do the plan and answer all the important question the writing contract will be easier than ever.
+
+okay i think i tried to answer the question and i have function and shit so like the explanation is really good so like let me start
+
 */
 
+interface IERC20 {
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+    function totalSupply() external view returns (uint256);
+    function balanceOf(address account) external view returns (uint256);
+    function transfer(address to, uint256 value) external returns (bool);
+    function allowance(address owner, address spender) external view returns (uint256);
+    function approve(address spender, uint256 value) external returns (bool);
+    function transferFrom(address from, address to, uint256 value) external returns (bool);
+}
 
 contract Governor {
+    event ProposalCreated(address indexed target, bytes callData, string description);
 
+    address public immutable token;
+
+    constructor(address _address) {
+        token = _address;
+    }
+
+    uint256 public currentID = 1;
+    uint256 public constant VOTING_PERIOD = 259200;
+    uint256 public constant MAX_DESCRIPTION_LENGTH = 512;
+
+    mapping(uint256 => Proposal) public proposals;
+    mapping(uint256 => (address => bool)) public has voted;
+
+    enum ProposalState {
+        Pending,
+        Active,
+        Succeeded,
+        Defeated,
+        Queued,
+        Executed
+    }
+
+    struct Proposal {
+        uint256 id;
+        address proposer;
+        address target;
+        bytes callData;
+        string description;
+        uint256 votesFor;
+        uint256 votesAgainst;
+        uint256 startTime;
+        uint256 endTime;
+        bool executed;
+    }
+
+    function propose(address target, bytes calldata callData, string calldata description) public {
+        // i need to follow the CEI i need to check this things since creating proposal take some gas i need to check if there is no slop proposal
+        // i need to check for zero address and if they can affroed it which is the token they hold.
+        require(IERC20(token).balanceOf(msg.sender) > 0, "You don't have enough power to propose");
+        require(target != address(0), "zero address contract is not allowed");
+        require(bytes(description).length <= MAX_DESCRIPTION_LENGTH, "too much wtf make it short");
+
+        uint256 startingTime = block.timestamp;
+        uint256 endingTime = block.timestamp + VOTING_PERIOD;
+
+        proposals[currentID] = Proposal({
+            id: currentID,
+            proposer: msg.sender,
+            target: target,
+            callData: callData,
+            description: description,
+            votesFor: 0,
+            votesAgainst: 0,
+            startTime: startingTime,
+            endTime: endingTime,
+            executed: false
+        });
+        hasVoted[currentID][msg.sender] = true;
+        currentID++;
+
+        ProposalState state = ProposalState.Active;
+
+        //i am going to emit an event
+        // i need to also add some important datas right so okay i will be back at it.
+        emit ProposalCreated(target, callData, description);
+    }
+
+    function vote(uint256 proposalId, bool support) external {
+      require(!hasvoted[proposalId][msg.sender], "already Voted");
+      require(state = 1, "closed voting window")
+
+
+    }
 }
