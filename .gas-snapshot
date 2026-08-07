@@ -1,0 +1,6 @@
+RewardVaultTest:testBatchCheckActive() (gas: 18396)
+RewardVaultTest:testDeposit() (gas: 162565)
+RewardVaultTest:testGetUserSummary() (gas: 15623)
+RewardVaultTest:testPause() (gas: 12685)
+RewardVaultTest:testSetFee() (gas: 13331)
+RewardVaultTest:testWithdraw() (gas: 168578)
