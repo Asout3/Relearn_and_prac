@@ -328,5 +328,7 @@ Tier 4 Exercise 2 — done. ✅
 
 me:
 I THINK I GOT THE AI BLESSING TO PASS TO THE NEXT EXERCISE OKAY SO IT IS GOOD EXERCISE I LEARNED NEW THINGS FROM IT AND I KNOW THAT I DIDN'T GOOD THAT MUCH DEEP BUT IF I CAME ACROSS IT I WILL PROBABLY GO DEEP IN IT LIKE IF I EVER NEED TO WRITE AN ARTICLE OR IN JOB OR something, I WILL STUDY AND READ MORE ABOUT IT for now this is enough i believe. 
+The more i learn and do the more i know my knowledge is not that much, so i will be working hard and doing what i do best to get more knowledge which fascinate my soul and me being able to contribute in this technology is more exciting to me. I love this industry.
+
 THANK YOU.
 */
