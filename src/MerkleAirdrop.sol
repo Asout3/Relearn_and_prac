@@ -119,10 +119,24 @@ Before coding — explain in your own words: why does hashing pairs together rep
 
 */
 
-error AlreadyClaimed();
+/*
+    AS ALWAYS THIS IS NOT A PRODUCTINO CODE I DON'T KNOW WHY I AM SAYING THIS AND ALSO
+    LIKE IN REAL PROD WE USE OPENZEPPLINE LIBRARIES AND SHIT FOR THAT AND THIS IS LIKE VERY VERY LITTLE
+    GLIMPS OF IT LIKE VERY SHORT VERY LITTLE PART OF IT OKAY AND ALSO IT IS NOT PERFECTLY DONE I JUST DO IT IN A WAY
+    OF LIKE THE EXERCISE REQUIRES ME TO DO SO THAT IS HOW IT IS DONE OKAY SO YA IT IS JUST A NOTICE FROM ME.
 
+
+*/
+
+//okay let me try to explain and i know i am not using params but like i will use them later in prod for time efficiency i need to get this done fast so i am just gonna comment them okay.
+
+// errors
+error AlreadyClaimed();
+error InvalidProof();
+
+// interface
 interface IERC20 {
-    function mint(address to, uint256 amount) external;
+     function transfer(address to, uint256 amount) external returns (bool);
 }
 
 contract MerkelAirdrop {
@@ -130,7 +144,7 @@ contract MerkelAirdrop {
 
     address public immutable token;
     bytes32 public immutable root;
-    mapping(bytes32 => bool) public claimed;
+    mapping(address => bool) public claimed;
 
     constructor(bytes32 _root, address _token) {
         token = _token;
@@ -140,23 +154,33 @@ contract MerkelAirdrop {
     // so like this is like to get leaf hash so as we all know we use our leaf hash to check with the root which is required to check
     // getting this is super important
     function getLeafHash(address to, uint256 amount) public pure returns (bytes32) {
-        return keccak256(abi.encode(to, amount));
+        return keccak256(abi.encodePacked(to, amount));
     }
 
+    // this is claim function which i am ordered to do
     function claim(bytes32[] calldata proof, uint256 amount) external {
+        // get the leaf at first
         bytes32 leaf = getLeafHash(msg.sender, amount);
+
+        // then this like i don't really understand how to use the vertify i just use it like this it returns bool if it returns bool that means it works it proofs so i take true as a yes then do my shit.
         bool truth = verify(proof, leaf);
 
-        if (claimed[leaf]) revert AlreadyClaimed();
+        // check if it is already claimed.
+        if (claimed[msg.sender]) revert AlreadyClaimed();
+        if(!truth) revert InvalidProof();
 
+        // do my shit if it proofs
         if (truth) {
-            claimed[leaf] = true;
-            IERC20(token).mint(msg.sender, amount);
+            claimed[msg.sender] = true;
+            bool success = IERC20(token).transfer(msg.sender, amount);
+            require(success, "transfer failed");
 
             emit Claim(msg.sender, amount);
         }
     }
 
+    // this is the vertify function that vertifeis it it starts from the leaf and goes to the root it uses
+    // loop to go all they way and check it at the end it gives us a bool
     function verify(bytes32[] calldata proof, bytes32 leaf) internal view returns (bool) {
         bytes32 computedHash = leaf;
 
@@ -173,3 +197,4 @@ contract MerkelAirdrop {
         return computedHash == root;
     }
 }
+
