@@ -220,7 +220,7 @@ forge fmt
 
 ### Author
 
-[![](https://img.shields.io/badge/X-@Asout3-000000?logo=x&logoColor=white)](https://x.com/Asout3)  **Miki**
+**Miki** [![](https://img.shields.io/badge/X-@Asout3-000000?logo=x&logoColor=white)](https://x.com/Asout3)  
 
 CS student · building toward smart contract / protocol engineering
 
