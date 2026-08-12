@@ -47,7 +47,7 @@ contract RewardVaultTest is Test {
 
         // Give the user 1000 tokens and approve the vault to spend them
         token.mint(user, 1000e18);
-        
+
         // Prank as the user to approve the tokens
         vm.prank(user);
         token.approve(address(vault), type(uint256).max);
@@ -90,7 +90,7 @@ contract RewardVaultTest is Test {
         users[0] = address(0x1);
         users[1] = address(0x2);
         users[2] = address(0x3);
-        
+
         vault.batchCheckActive(users);
     }
 }

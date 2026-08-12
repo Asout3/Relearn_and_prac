@@ -136,7 +136,7 @@ error InvalidProof();
 
 // interface
 interface IERC20 {
-     function transfer(address to, uint256 amount) external returns (bool);
+    function transfer(address to, uint256 amount) external returns (bool);
 }
 
 contract MerkelAirdrop {
@@ -167,7 +167,7 @@ contract MerkelAirdrop {
 
         // check if it is already claimed.
         if (claimed[msg.sender]) revert AlreadyClaimed();
-        if(!truth) revert InvalidProof();
+        if (!truth) revert InvalidProof();
 
         // do my shit if it proofs
         if (truth) {

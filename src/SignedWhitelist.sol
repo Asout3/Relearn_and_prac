@@ -3,18 +3,16 @@ pragma solidity ^0.8.34;
 
 /*
 
-  _________.__                         ._____      __.__    .__  __         .__  .__          __   
- /   _____/|__| ____   ____   ____   __| _/  \    /  \  |__ |__|/  |_  ____ |  | |__| _______/  |_ 
+  _________.__                         ._____      __.__    .__  __         .__  .__          __
+ /   _____/|__| ____   ____   ____   __| _/  \    /  \  |__ |__|/  |_  ____ |  | |__| _______/  |_
  \_____  \ |  |/ ___\ /    \_/ __ \ / __ |\   \/\/   /  |  \|  \   __\/ __ \|  | |  |/  ___/\   __\
- /        \|  / /_/  >   |  \  ___// /_/ | \        /|   Y  \  ||  | \  ___/|  |_|  |\___ \  |  |  
-/_______  /|__\___  /|___|  /\___  >____ |  \__/\  / |___|  /__||__|  \___  >____/__/____  > |__|  
-        \/   /_____/      \/     \/     \/       \/       \/              \/             \/        
+ /        \|  / /_/  >   |  \  ___// /_/ | \        /|   Y  \  ||  | \  ___/|  |_|  |\___ \  |  |
+/_______  /|__\___  /|___|  /\___  >____ |  \__/\  / |___|  /__||__|  \___  >____/__/____  > |__|
+        \/   /_____/      \/     \/     \/       \/       \/              \/             \/
 
 */
 
-
-
-// ALRIGHT LETS START 
+// ALRIGHT LETS START
 
 /*
 Tier 4 Exercise 4 — EIP-712 Signed Whitelist
@@ -123,13 +121,11 @@ okay let me answer the asked question here are they:
 
 */
 
-
 /*
     AS ALWAYS THIS IS NOT PRODUCTION CODE.
     IN REAL PROD YOU'D USE OpenZeppelin ECDSA / EIP712 helpers.
     THIS IS THE EXERCISE VERSION — LEARN THE MECHANICS.
 */
-
 
 contract SignedWhitelist {
     // custom errors

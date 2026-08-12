@@ -293,7 +293,7 @@ contract Proxy {
 
 /*
 
-    okay after i gave my code the ai responded with this: 
+    okay after i gave my code the ai responded with this:
 
     Your delegatecall explanation is genuinely excellent — the cheating-student analogy is correct and actually a clean way to think about it: the implementation provides the logic ("the answer"), but execution happens in the proxy's own context, so all state changes land in the proxy's storage, not the implementation's. And your explanation of why call breaks it is exactly right — with a regular call, the logic contract would read/write its own storage instead of the proxy's, meaning the proxy would never see any state change at all. That's the correct mental model.
 
@@ -309,12 +309,12 @@ Question: after the upgrade, if you call Proxy.balanceOf(yourAddress), what numb
 
 
 
-AND HERE IS MY ANSWER: 
+AND HERE IS MY ANSWER:
 
 well the answer is it uses the proxy storage so the implementations like v1 or v2 or only just logic right so every storage every thing that stays on the proxy that is what the balance and the address are the same becuase they are under the proxy contract storage.
 
 
-AND THE AI RESPONDED WITH THIS: 
+AND THE AI RESPONDED WITH THIS:
 
 
 Correct — exactly right.
@@ -327,7 +327,7 @@ Tier 4 Exercise 2 — done. ✅
 
 
 me:
-I THINK I GOT THE AI BLESSING TO PASS TO THE NEXT EXERCISE OKAY SO IT IS GOOD EXERCISE I LEARNED NEW THINGS FROM IT AND I KNOW THAT I DIDN'T GOOD THAT MUCH DEEP BUT IF I CAME ACROSS IT I WILL PROBABLY GO DEEP IN IT LIKE IF I EVER NEED TO WRITE AN ARTICLE OR IN JOB OR something, I WILL STUDY AND READ MORE ABOUT IT for now this is enough i believe. 
+I THINK I GOT THE AI BLESSING TO PASS TO THE NEXT EXERCISE OKAY SO IT IS GOOD EXERCISE I LEARNED NEW THINGS FROM IT AND I KNOW THAT I DIDN'T GOOD THAT MUCH DEEP BUT IF I CAME ACROSS IT I WILL PROBABLY GO DEEP IN IT LIKE IF I EVER NEED TO WRITE AN ARTICLE OR IN JOB OR something, I WILL STUDY AND READ MORE ABOUT IT for now this is enough i believe.
 The more i learn and do the more i know my knowledge is not that much, so i will be working hard and doing what i do best to get more knowledge which fascinate my soul and me being able to contribute in this technology is more exciting to me. I love this industry.
 
 THANK YOU.

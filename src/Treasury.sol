@@ -37,16 +37,15 @@ okay lets start this is kinda new topic for me honestly but like i will try to l
 */
 // let me explain the code
 
-// custom errors 
+// custom errors
 error ManagerDoesNotExist();
 error ManagerExist();
 error YouCanNotWithDrawThisAtOneTime();
 error NotAuthorized();
 
-// the contract 
+// the contract
 contract Treasury {
-
-    // events 
+    // events
     event Deposited(address indexed _address, uint256 indexed amount);
     event Withdrawal(address indexed _role, uint256 indexed amount);
     event RoleChanged(address indexed _removed, address indexed _added);
@@ -58,12 +57,11 @@ contract Treasury {
     mapping(address => roles) public assignedRoles; // this is the mapping for the address and role relation address to the role they have
 
     // the enum roles
-    enum roles {  
+    enum roles {
         admin,
         manager,
         viewer
     }
-    
 
     // this is the constructor which i set the admin here
     constructor() {
@@ -83,24 +81,24 @@ contract Treasury {
         _;
     }
 
-    // this is addmanager function only admin can access it 
+    // this is addmanager function only admin can access it
     function addManager(address _address) public onlyAdmin {
-        if(assignedRoles[_address] == roles.manager) revert ManagerExist();
+        if (assignedRoles[_address] == roles.manager) revert ManagerExist();
 
         assignedRoles[_address] = roles.manager;
         emit RoleChanged(address(0), _address);
     }
 
-    // this is remove manager function 
+    // this is remove manager function
     function removeManager(address _address) public onlyAdmin {
-        if(assignedRoles[_address] != roles.manager) revert ManagerDoesNotExist();
+        if (assignedRoles[_address] != roles.manager) revert ManagerDoesNotExist();
 
         assignedRoles[_address] = roles.viewer;
         emit RoleChanged(_address, address(0));
     }
 
     // this is incase
-     receive() external payable {
+    receive() external payable {
         emit Deposited(msg.sender, msg.value);
     }
 
@@ -111,21 +109,21 @@ contract Treasury {
 
     // withdrawal func
     function withdraw(uint256 amount) public {
-    if(assignedRoles[msg.sender] != roles.admin && 
-       assignedRoles[msg.sender] != roles.manager) revert NotAuthorized();
-    if(assignedRoles[msg.sender] == roles.manager && 
-       amount > withdrawAmountForManager) revert YouCanNotWithDrawThisAtOneTime();
+        if (assignedRoles[msg.sender] != roles.admin && assignedRoles[msg.sender] != roles.manager) {
+            revert NotAuthorized();
+        }
+        if (assignedRoles[msg.sender] == roles.manager && amount > withdrawAmountForManager) {
+            revert YouCanNotWithDrawThisAtOneTime();
+        }
 
-    (bool success, ) = msg.sender.call{value: amount}("");
-    require(success, "Transfer failed");
-    emit Withdrawal(msg.sender, amount);
+        (bool success,) = msg.sender.call{value: amount}("");
+        require(success, "Transfer failed");
+        emit Withdrawal(msg.sender, amount);
     }
 
-    function viewVault() public view returns(uint256) {
+    function viewVault() public view returns (uint256) {
         return address(this).balance;
     }
 
     // the reason i didn't put view function for the vault variable cuz its public so solidity will create getter automatically so ya
-
-
 }

