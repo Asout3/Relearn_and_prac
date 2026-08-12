@@ -1,7 +1,7 @@
 <div align="center">
 
 # Solidity from Scratch
-### 20 exercises · 4 tiers · built without OpenZeppelin
+### 20 exercises · 4 tiers · Solidity relearning
 
 ![Solidity](https://img.shields.io/badge/Solidity-%5E0.8.30-363636?logo=solidity)
 ![Foundry](https://img.shields.io/badge/Foundry-forge-black)
@@ -9,7 +9,7 @@
 ![Status](https://img.shields.io/badge/phase-contracts%20done%20·%20tests%20next-blue)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-**Contracts first. Tests and scripts next.**
+**Contracts-only repo — no full test suite yet.**
 
 </div>
 
@@ -128,7 +128,7 @@ Phase 2 has to prove I can **verify them** the way real smart contract work expe
 - Protocol-level projects built on this base
 - A **Uniswap V4 hooks** project with a real design rationale — not another tutorial clone
 
-**Bottom line:** contracts without tests are incomplete. Phase 2 is how I close that.
+**Bottom line:** contracts without tests are incomplete. Phase 2 is how I close that — and that work will live in another repo.
 
 ---
 
@@ -164,7 +164,7 @@ Vault shares, staking checkpoints, AMM reserves and LP shares — systems where 
 
 ---
 
-## Scope (read this)
+## Scope
 
 These are simplified learning implementations inspired by real designs. They are **not**:
 
@@ -179,7 +179,7 @@ Some limitations are left on purpose so the lesson stays visible. The vault, for
 
 ---
 
-## AI use (also honest)
+## AI use
 
 I used AI as a learning tool, not as a substitute for understanding.
 
@@ -203,8 +203,8 @@ This repo is less “20 finished products” and more: I moved from language bas
 
 ```text
 src/       # 20 exercise contracts + adv.txt checklist
-test/      # Foundry tests (early — expanding in Phase 2)
-script/    # Foundry scripts (basic deploy exists — expanding in Phase 2)
+test/      # Foundry tests (gas-report only for now)
+script/    # Foundry scripts (basic deploy exists; expanding in Phase 2)
 lib/       # forge-std
 ```
 
@@ -220,10 +220,12 @@ forge fmt
 
 ### Author
 
-**Miki** — [@Asout3](https://github.com/Asout3)
+**Miki**
+
+[![X](https://img.shields.io/badge/X-@Asout3-000000?logo=x&logoColor=white)](https://x.com/Asout3)
 
 CS student · building toward smart contract / protocol engineering
 
-Phase 1: contracts from scratch · Phase 2: tests, scripts, real verification
+Phase 1: contracts from scratch · Phase 2: tests, scripts, gas optimization, and designing systems from scratch
 
 </div>
