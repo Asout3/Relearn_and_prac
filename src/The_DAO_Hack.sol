@@ -4,6 +4,75 @@ pragma solidity ^0.8.34;
 
 /*
 
+i wrote the first like case study and gave it to ai and to make it polish and to make it like better 
+and it gave me this so i asked to make it proffessional and shit so i wrote it and ai make it better okay
+so like this like casestudy like the note is like edited and modifed by ai okay i want to admit that and i 
+did what i do best okay.
+
+================================================================================
+  TIER 4 EXERCISE 5 — THE DAO HACK (June 17, 2016): A Reentrancy Case Study
+================================================================================
+
+WHAT HAPPENED
+-------------
+In April 2016, "The DAO" (Decentralized Autonomous Organization) launched as a
+venture capital fund governed entirely by smart contracts on Ethereum. It raised
+approximately $150 million worth of ETH in a token sale — the largest
+crowdfunding campaign in history at that time.
+
+On June 17, 2016, an unknown attacker exploited a reentrancy vulnerability in
+The DAO's `splitDAO()` function and drained roughly 3.64 million ETH, valued at
+approximately $60 million USD. The stolen funds were moved into a "child DAO"
+where they were locked for 28 days due to DAO withdrawal rules, creating a
+narrow window for the community to respond.
+
+THE HARD FORK & THE ETH / ETC SPLIT
+------------------------------------
+On July 20, 2016, the Ethereum community executed a controversial hard fork at
+block 1,920,000. The fork rolled the blockchain state back to before the exploit
+and returned the stolen funds to a recovery contract where original investors
+could reclaim their ETH.
+
+A minority of miners and node operators refused the upgrade, believing that
+"code is law" and that blockchain immutability should not be overridden by
+social consensus. They continued mining the original, unforked chain, which
+became Ethereum Classic (ETC). The upgraded chain became the dominant Ethereum
+(ETH) used today.
+
+WHY THE BUG EXISTED
+-------------------
+The DAO's withdrawal logic followed this dangerous pattern:
+
+    1. Send ETH to the user via an external call
+    2. Update the user's internal balance
+
+In 2016, the Solidity compiler and developer community had not yet internalized
+that any external call to an untrusted address hands over control flow to
+potentially malicious code. The attacker deployed a contract whose fallback/
+receive function simply called `withdraw()` again — before the DAO ever deducted
+the attacker's balance. This created a recursive loop that drained the contract.
+
+WHY THIS CHANGED EVERYTHING
+---------------------------
+This single incident is the direct reason two defensive patterns became
+mandatory across the entire smart contract industry:
+
+  • CEI (Checks-Effects-Interactions): Update all state (Effects) BEFORE making
+    any external calls (Interactions).
+
+  • ReentrancyGuard: A mutex lock that prevents recursive re-entry into a
+    function, providing a safety net even if CEI is missed or bypassed.
+
+Every modern audit checklist starts here. Every security researcher is expected
+to spot this pattern on sight. The DAO hack is the $60 million lesson that
+taught the industry why security patterns exist, not just how to apply them.
+================================================================================
+*/
+
+
+
+/*
+
 Tier 4 Exercise 5 — Reproduce a Historical Exploit
 
 Real world context: This is what separates people who "know Solidity" from people who think like auditors. Real security researchers study past exploits obsessively — not to copy them, but to internalize the failure patterns so they recognize them instantly in new code.
@@ -61,7 +130,7 @@ error NotOwner();
 contract TheDAO_Vulnerable {
 	mapping(address => uint256) public balances;
 
-	function deposite() payable public {
+	function deposit() payable public {
         balances[msg.sender] += msg.value;
     }
 
@@ -97,16 +166,16 @@ contract Attacker {
     	target.deposit{value: msg.value}();
 	}
 
-    function attack() external {
-    	(bool success,) = msg.sender.call{value: 1 ether}("");
-    	require(success, "transfer failed");
-        target.withdraw(amountToWithdraw);
+    function attack() external payable {
+    	 require(msg.value >= amountToWithdraw, "Send ETH");
+    	target.deposit{value: amountToWithdraw}();
+    	target.withdraw(amountToWithdraw);
     }
 
     receive() external payable {
-        if(address(target).balance >= amountToWithdraw && address(this).balance < whenToStop ){
-            	target.withdraw(amountToWithdraw);
-        }
+        if (address(target).balance >= amountToWithdraw) {
+        	target.withdraw(amountToWithdraw);
+    	}
     }
 
     function collect(address _to) public {
@@ -139,7 +208,7 @@ contract TheDAO_Fixed {
 		status = NOT_ENTERED;
 	}
 
-	function deposite() payable public {
+	function deposit() payable public {
         balances[msg.sender] += msg.value;
     }
 
