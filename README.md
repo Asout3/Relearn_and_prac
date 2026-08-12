@@ -1,123 +1,229 @@
-# My Solidity Structured Relearning Roadmap and Exercises 
- 
-> **Note:** This repository does not yet include a test suite. Every contract here was written and manually reasoned through in Remix & Foundry, not validated with Foundry tests, fuzzing, or CI. Building that out  unit tests, fuzz tests, invariant tests, deployment scripts — is the explicit next phase of this work, covered in the [Development environment](#development-environment) and [What's next](#whats-next) sections below.
- 
-This repository documents my return to Solidity after several months away from the language. Instead of jumping straight into frameworks and production abstractions, I deliberately rebuilt the underlying mechanics myself: state management, token standards, security patterns, DeFi accounting, cryptographic authorization, upgradeability, gas optimization, and historical exploits.
- 
-The goal isn't to present these contracts as production-ready protocols. The goal is to show that I can take a specification, reason about the system before writing any code, implement the core mechanics, identify how it can fail, and explain the trade-offs behind the design.
- 
-## What this repository demonstrates
- 
-- Solidity fundamentals and contract architecture
-- ERC20- and ERC721-style token implementations, written without OpenZeppelin
-- Checks-Effects-Interactions and reentrancy mitigation
-- Custom errors, events, modifiers, mappings, structs, and access control
-- Vault and share-accounting mechanics inspired by ERC4626
-- Synthetix-style reward-per-token accounting without per-user loops
-- Constant-product AMM math (`x * y = k`) and LP share accounting
-- ERC-3156-style flash loan mechanics
-- Governance with quorum, voting, timelocks, and on-chain execution
-- Storage layout and `delegatecall` mechanics behind UUPS-style upgradeability
-- Merkle proof verification
-- EIP-712 typed-data hashing and `ecrecover`
-- Gas optimization through storage packing, SLOAD caching, calldata, custom errors, and controlled unchecked arithmetic
-- A simplified reproduction of the vulnerability pattern behind The DAO hack
-## The learning path
- 
-Twenty exercises across four progressively harder tiers. Each tier builds on the concepts introduced in the one before it, rather than treating every contract as an isolated tutorial.
- 
+<div align="center">
+
+# Solidity from Scratch
+### 20 exercises · 4 tiers · built without OpenZeppelin
+
+![Solidity](https://img.shields.io/badge/Solidity-%5E0.8.30-363636?logo=solidity)
+![Foundry](https://img.shields.io/badge/Foundry-forge-black)
+![No OZ](https://img.shields.io/badge/OpenZeppelin-not%20used-orange)
+![Status](https://img.shields.io/badge/phase-contracts%20done%20·%20tests%20next-blue)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
+**Contracts first. Tests and scripts next.**
+
+</div>
+
+---
+
+I came back to Solidity after a few months away and chose the hard path on purpose.
+
+Instead of grabbing OpenZeppelin and shipping something that *looks* finished, I rebuilt the core mechanics myself — from a written spec, with reasoning before code. Tokens, security patterns, vault math, staking rewards, AMM accounting, flash loans, governance, UUPS upgradeability, Merkle proofs, EIP-712 signatures, gas optimization, and a simplified DAO reentrancy case study.
+
+This repo is **phase one**: implementation and protocol reasoning.  
+**Phase two** is the engineering layer I still owe myself — real Foundry testing, scripting, and harder verification. That is not a vague “someday.” It is the plan. See [Phase 2 — what's next](#phase-2--whats-next).
+
+> **Read this as learning code with serious intent — not production code, and not a finished portfolio product.**  
+> No real funds. No “audited protocol” claims. Just me building, breaking things in my head, and writing it down.
+
+---
+
+## Why this exists
+
+I wanted something I could point to and stand behind:
+
+1. I can take a **spec** and turn it into working Solidity
+2. I can reason about **state, invariants, and failure modes** before I type
+3. I can implement **DeFi-style accounting** without copying a library
+4. I can explain **trade-offs** in plain language
+5. I stay **honest** about AI help, known limits, and what still needs work
+
+If you only open a few files, start here:
+
+| Priority | File | Why |
+|---|---|---|
+| 1 | [`src/Vault.sol`](src/Vault.sol) | Share math + inflation-attack thinking |
+| 2 | [`src/StakingRewards.sol`](src/StakingRewards.sol) | Synthetix-style rewards without user loops |
+| 3 | [`src/AMM.sol`](src/AMM.sol) | Constant product + LP accounting |
+| 4 | [`src/UUPS_Exercise.sol`](src/UUPS_Exercise.sol) | Proxy / `delegatecall` / upgrade path |
+| 5 | [`src/The_DAO_Hack.sol`](src/The_DAO_Hack.sol) | Reentrancy case study + historical context |
+| — | [`src/adv.txt`](src/adv.txt) | The questions I try to ask on every contract |
+
+---
+
+## Phase 1 — the roadmap (done)
+
+Twenty exercises across four tiers. Each tier builds on the last.
+
 ### Tier 1 — Foundations
-The language and the basic building blocks of a smart contract.
- 
-- **Bank** — deposits, withdrawals, mappings, custom errors, events, and CEI
-- **Voting System** — enums, structs, mappings, and preventing double voting
-- **Whitelist** — dynamic arrays and swap-and-pop removal
-- **On-chain Todo List** — struct mappings and sequential IDs
-- **ERC20 from scratch** — balances, allowances, transfers, approvals, events, and supply accounting
-### Tier 2 — Core Patterns & Security
-Moving from syntax into security and reusable contract patterns.
- 
-- **Reentrancy** — vulnerable and mitigated withdrawal flows
-- **ERC721-style NFT** — ownership and transfer mechanics
-- **Treasury** — role-based access control and restricted operations
-- **Overflow / Underflow** — integer arithmetic behavior before and after Solidity 0.8
-- **TipJar** — pull-style payment mechanics and withdrawal patterns
-### Tier 3 — DeFi Mechanics
-Where the exercises start combining multiple concepts into protocol-level accounting systems. This was the hardest tier by a wide margin.
- 
-- **Vault** — share-price math, proportional ownership, deposits, withdrawals, and an explicit study of the ERC4626 inflation-attack problem
-- **StakingRewards** — Synthetix-style `rewardPerTokenStored` accounting that distributes rewards without ever looping over stakers
-- **AMM** — constant-product pricing, LP shares, reserve accounting, and my own `sqrt()` and `min()` implementations
-- **Flash Loan** — lender/borrower flow based on the ERC-3156 callback model
-- **Governor** — token-weighted voting, quorum, proposal state, timelocks, and arbitrary target execution
-### Tier 4 — Gas, Cryptography & Advanced Architecture
-Mechanisms that require a deeper understanding of the EVM and of protocol design.
- 
-- **Gas Optimization** — storage packing, cached storage reads, calldata, custom errors, and safe unchecked arithmetic — with one rule I held myself to throughout: optimization should never change what the contract actually does
-- **UUPS-style Upgradeability** — proxy storage, `delegatecall`, initialization, storage layout compatibility, and upgrading from V1 to V2
-- **Merkle Airdrop** — proof verification using sorted Merkle pairs
-- **EIP-712 Signed Whitelist** — typed-data domain separation, manual signature parsing, and `ecrecover`
-- **The DAO Hack Case Study** — a simplified vulnerable contract, an attacker contract, the fix, and a researched write-up of the 2016 reentrancy exploit and why it changed smart contract security for good
-## How I approached the exercises
- 
-I treated this as an engineering exercise, not a set of copy-paste tutorials. For each problem, the process was roughly:
- 
-**Specification → reasoning → design → implementation → debugging → security review → explanation.**
- 
-Before writing any code, I tried to work out the state that needed to exist, the invariants the contract had to preserve, the external calls it would make, and the edge cases that could break the intended behavior. Getting that right first is what actually made the code easier to write.
- 
-The comments in the source files preserve a lot of that reasoning. They're more detailed and more informal than production documentation would be, because this repository is also a record of how my understanding developed while I was building each system — not just the finished output.
- 
-## Engineering themes
- 
-**Security**
-Treated as part of the design process, not a checklist run at the end. Recurring patterns across the exercises: Checks-Effects-Interactions, reentrancy mitigation, access control, input validation, signature validation, replay protection through EIP-712 domain separation, storage-layout compatibility for upgradeable contracts, and failure handling around external token calls. The DAO exercise closes the roadmap by tying one of the most important vulnerability patterns in smart contract history to the actual incident that made it widely understood.
- 
-**DeFi accounting**
-Several exercises are built around accounting, not just exposed functions. The vault and staking exercises forced me to reason about proportional ownership, checkpoints, and reward accumulation — and specifically why protocols avoid ever iterating over every user. The AMM combines those ideas with reserve invariants and LP share accounting.
- 
-**EVM mechanics**
-The later exercises move closer to how the EVM actually executes contracts: `delegatecall` and execution context, proxy storage versus implementation logic, calldata layout and signature parsing, `ecrecover`, storage slots and packing, and the gas cost of storage access. The point was to understand what the higher-level abstractions are actually doing underneath.
- 
-## Development environment
- 
-These exercises were developed interactively and iteratively, working through each contract, reasoning about its design, then implementing and debugging it. The repository structure is intentionally simple right now, so the Solidity itself and the reasoning behind it stay easy to read.
- 
-The next phase of this roadmap moves the work into a proper Foundry workflow: unit tests, fuzz testing, invariant testing, deployment scripts, gas benchmarking, and CI. That work is in progress, not yet reflected in this repo.
- 
-## Scope and limitations
- 
-This is educational code, not production protocol code.
- 
-The implementations favor understanding the underlying mechanics over completeness, battle-tested abstractions, or production hardening. Several exercises deliberately simplify real protocols so one concept stays visible instead of being buried inside a mature framework — the AMM, the governance system, the upgradeable token, the vault, and the staking system are all learning implementations inspired by real designs, not claims of standards compliance or production equivalence.
- 
-Some exercises intentionally leave known limitations in place as part of the lesson. The vault, for example, documents the inflation-attack problem rather than hiding it behind a fix I hadn't actually reasoned through myself.
- 
-Read this repository as evidence of learning, implementation ability, security awareness, and protocol reasoning — not as a library anyone should deploy with real funds.
- 
-## Use of AI assistance
- 
-I used AI as a learning tool, not as a substitute for understanding the systems I was building.
- 
-On some exercises — particularly reward accounting, EIP-712, proxy storage, and gas optimization — AI helped me get unblocked, pressure-tested my reasoning, or gave me a starting point. From there I worked through the actual behavior, tested it, and rewrote or explained the relevant ideas in my own words before moving on.
- 
-I kept that process visible in the source comments instead of presenting the work as entirely unassisted. What actually matters to me is whether I understand what the code does and can reason about its security and trade-offs — and I'd rather be upfront about how I got there than pretend otherwise.
- 
-## What I learned
- 
-The biggest lesson from this roadmap: Solidity syntax is the easy part.
- 
-The hard part is reasoning about state, invariants, external calls, trust boundaries, accounting, and execution context. Writing the actual contract gets much easier once those questions are answered first — which is why the later exercises spend less time on syntax and more time on protocol mechanics and failure modes.
- 
-This repository is less a collection of finished projects and more a record of moving from basic Solidity constructs toward actually thinking in terms of smart contract systems.
- 
-## What's next
- 
-This roadmap is the foundation for the next phase of my work. That phase is deeper Foundry work — stronger unit test coverage, fuzz testing, invariant testing, deployment and scripting workflows, real gas benchmarking — and protocol-level projects built on top of it.
- 
-The longer-term direction is building and understanding more realistic DeFi infrastructure, including a Uniswap V4 hooks project with an explicit protocol-design rationale behind it, not another tutorial clone.
- 
-## Author
- 
+Language basics and the building blocks of a contract.
+
+| Contract | What I practiced |
+|---|---|
+| **Bank** | Deposits, withdrawals, mappings, custom errors, events, CEI |
+| **Voting System** | Enums, structs, mappings, double-vote prevention |
+| **Whitelist** | Dynamic arrays, swap-and-pop removal |
+| **On-chain Todo** | Struct mappings, sequential IDs |
+| **ERC20 from scratch** | Balances, allowances, transfers, approvals, supply |
+
+### Tier 2 — Patterns & security
+From syntax into how contracts actually get broken.
+
+| Contract | What I practiced |
+|---|---|
+| **Reentrancy** | Vulnerable vs mitigated withdrawal flows |
+| **NFT (ERC721-style)** | Ownership and transfer mechanics |
+| **Treasury** | Role-based access control |
+| **Overflow / Underflow** | Integer behavior before and after Solidity 0.8 |
+| **TipJar** | Pull payments and safer withdrawal patterns |
+
+### Tier 3 — DeFi mechanics
+Hardest tier. Multiple concepts in one system.
+
+| Contract | What I practiced |
+|---|---|
+| **Vault** | Share-price math, proportional ownership, ERC4626 inflation-attack study |
+| **StakingRewards** | Synthetix-style `rewardPerTokenStored` — rewards without looping over users |
+| **AMM** | Constant product (`x * y = k`), LP shares, my own `sqrt()` / `min()` |
+| **Flash Loan** | ERC-3156-style lender/borrower callback flow |
+| **Governor** | Token-weighted voting, quorum, timelock, on-chain execution |
+
+### Tier 4 — Gas, cryptography & architecture
+Closer to the EVM and protocol design.
+
+| Contract | What I practiced |
+|---|---|
+| **Gas Optimization** | Storage packing, SLOAD caching, calldata, custom errors, safe `unchecked` — without changing behavior |
+| **UUPS Upgradeability** | `delegatecall`, proxy storage, init, layout compatibility, V1 → V2 |
+| **Merkle Airdrop** | Sorted-pair Merkle proof verification |
+| **EIP-712 Signed Whitelist** | Domain separation, signature parsing, `ecrecover` |
+| **The DAO Hack** | Vulnerable contract + attacker + fix, plus a write-up of the 2016 incident |
+
+---
+
+## Phase 2 — what's next
+
+This is the part I care about most right now.
+
+Phase 1 proved I can **build the mechanics**.  
+Phase 2 has to prove I can **verify them** the way real smart contract work expects.
+
+### 1. Testing (priority)
+- Full **unit tests** for the high-risk contracts first: Vault, StakingRewards, AMM, Reentrancy, Governor, UUPS
+- **Fuzz tests** on math-heavy paths (share pricing, reward accounting, swap invariants)
+- **Invariant tests** where they matter (e.g. vault solvency, AMM `k`, staking reward conservation)
+- Better use of Foundry: `vm.prank`, `vm.warp`, expect-reverts, event assertions
+- Right now there is only early test scaffolding (a gas report test) — not real coverage. That gap is intentional to call out, not hide.
+
+### 2. Scripting & deployment workflows
+- Real Foundry **deployment scripts** (beyond a basic token deploy)
+- Local / testnet deploy flow, env handling, and repeatable setup
+- Scripts that wire multi-contract systems the way a protocol actually boots
+
+### 3. Gas, CI, and engineering hygiene
+- Proper **gas snapshots / benchmarks** on hot paths
+- Keep CI useful: `forge fmt`, `forge build`, `forge test` — and make the test step mean something once coverage exists
+- Cleaner structure as tests and scripts grow
+
+### 4. After the foundation is solid
+- Protocol-level projects built on this base
+- A **Uniswap V4 hooks** project with a real design rationale — not another tutorial clone
+
+**Bottom line:** contracts without tests are incomplete. Phase 2 is how I close that.
+
+---
+
+## How I work through an exercise
+
+I do not start by typing Solidity.
+
+**Spec → reason → design → implement → debug → security pass → explain.**
+
+Before code, I try to answer:
+
+- What state has to exist?
+- What invariants must hold?
+- What external calls happen?
+- What edge cases break the happy path?
+
+`src/adv.txt` is my short checklist for security, gas, logic, and design.
+
+Comments in the source are more detailed (and more informal) than production docs on purpose. This repo is also a record of how my understanding grew — not only the final functions.
+
+---
+
+## Themes that keep showing up
+
+**Security as design, not a final checklist.**  
+CEI, reentrancy, access control, input validation, EIP-712 domain separation, storage layout for upgrades, careful external token calls.
+
+**Accounting over “just functions.”**  
+Vault shares, staking checkpoints, AMM reserves and LP shares — systems where the math *is* the protocol.
+
+**EVM reality.**  
+`delegatecall`, proxy vs implementation storage, calldata and signatures, `ecrecover`, packing, cost of storage reads.
+
+---
+
+## Scope (read this)
+
+These are simplified learning implementations inspired by real designs. They are **not**:
+
+- production protocols
+- standards-complete libraries
+- audited code
+- something to deploy with real money
+
+Some limitations are left on purpose so the lesson stays visible. The vault, for example, documents the inflation-attack problem instead of papering over it with a fix I had not fully reasoned through myself.
+
+**Read this as evidence of learning, implementation skill, and security awareness.**
+
+---
+
+## AI use (also honest)
+
+I used AI as a learning tool, not as a substitute for understanding.
+
+On tougher spots — reward accounting, EIP-712, proxy storage, gas optimization — AI helped me get unstuck or pressure-test my thinking. From there I worked the behavior myself, rewrote where I needed to, and left the reasoning in comments.
+
+I would rather be clear about how I learned than pretend every line came out of thin air. What matters is whether I understand the code, its failure modes, and the trade-offs.
+
+---
+
+## Biggest takeaway
+
+**Solidity syntax is the easy part.**
+
+The hard part is state, invariants, external calls, trust boundaries, accounting, and execution context. Once those are clear, writing the contract is much less painful.
+
+This repo is less “20 finished products” and more: I moved from language basics toward thinking in systems — and the next systems skill I am building is testing and verification.
+
+---
+
+## Repo layout
+
+```text
+src/       # 20 exercise contracts + adv.txt checklist
+test/      # Foundry tests (early — expanding in Phase 2)
+script/    # Foundry scripts (basic deploy exists — expanding in Phase 2)
+lib/       # forge-std
+```
+
+```bash
+forge build
+forge test
+forge fmt
+```
+
+---
+
+<div align="center">
+
+### Author
+
 **Miki** — [@Asout3](https://github.com/Asout3)
-Computer Science student focused on smart contract and protocol engineering.
+
+CS student · building toward smart contract / protocol engineering
+
+Phase 1: contracts from scratch · Phase 2: tests, scripts, real verification
+
+</div>
