@@ -54,12 +54,15 @@ Go.
 
 */
 
+error NotEnough();
+error NotOwner();
+
 contract TheDAO_Vulnerable {
 	mapping(address => uint256) public balances;
 
 
     function withdraw(uint256 amount) public {
-        if(balances[msg.sender] < amount) revert notEnough();
+        if(balances[msg.sender] < amount) revert NotEnough();
 
         (bool success, ) = msg.sender.call{value: amount}(""); 
         require(success, "failed transaction");
@@ -80,7 +83,7 @@ contract Attacker {
 
 	address private owner; 
 
-    constructor(address _target,) {
+    constructor(address _target) {
         target = TheDAO_Vulnerable(_target);
         owner = msg.sender;
 
@@ -93,7 +96,7 @@ contract Attacker {
     receive() external payable {
         if(address(target).balances >= amountToWithdraw){
             if(address(this).balances <= whenToStop) {
-            	target.withdraw(starter);
+            	target.withdraw(amountToWithdraw);
         	}
         }
     }
@@ -125,7 +128,7 @@ contract TheDAO_Fixed {
 	}
 
     function withdraw(uint256 amount) public nonReentrant {
-        if(balances[msg.sender] < amount) revert notEnough();
+        if(balances[msg.sender] < amount) revert NotEnough();
 
         balances[msg.sender] -= amount; 
 
