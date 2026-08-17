@@ -21,7 +21,7 @@
 >
 > If you open `src/`, you will see that on purpose:
 >
-> - **The exercise prompt is often pasted at the top of the file.** I start from the spec, then reason, then write. The prompt is left in so you can see what I was actually answering.
+> - **The exercise question is often pasted at the top of the file.** I start from the spec, then reason, then write. The question is left in so you can see what I was actually answering.
 > - **Comments are messy and informal.** They are a thinking journal — slang, long notes, mid-solve questions — not production documentation.
 > - **Naming is inconsistent.** Mix of styles (`deposite` vs `deposit`, `safeBank` vs `SafeBank`, event/error casing that does not match convention).
 > - **Spelling and typos are in the code.** Function names, errors, comments (`Insufficent`, `VunlerableBank`, `ZeroAmountInputed`, etc.). I know they are there.
@@ -30,7 +30,7 @@
 >
 > I am not asking you to ignore this. I am telling you I already see it.
 >
-> **Phase 2 is where this gets cleaned up** — naming, spelling, comments, structure, tests, scripts, and the production-style checks I skipped here so I could focus on solving the problems. That work will live in another repo. See [Phase 2 — what's next](#phase-2--whats-next).
+> **Phase 2 is where this gets better and this kinds of things never happens** — naming, spelling, comments, structure, tests, scripts, and other. the production-style checks I skipped here so I could focus on solving the problems. That work will live in another repo. See [Phase 2 — what's next](#phase-2--whats-next).
 
 ---
 
