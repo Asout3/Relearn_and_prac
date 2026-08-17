@@ -15,6 +15,25 @@
 
 ---
 
+> **Notice — please read this first**
+>
+> This is **exercise / learning code**, not production Solidity. Phase 1 was about solving the questions and understanding the mechanics. I did **not** stop to make the files look like a polished library.
+>
+> If you open `src/`, you will see that on purpose:
+>
+> - **The exercise prompt is often pasted at the top of the file.** I start from the spec, then reason, then write. The prompt is left in so you can see what I was actually answering.
+> - **Comments are messy and informal.** They are a thinking journal — slang, long notes, mid-solve questions — not production documentation.
+> - **Naming is inconsistent.** Mix of styles (`deposite` vs `deposit`, `safeBank` vs `SafeBank`, event/error casing that does not match convention).
+> - **Spelling and typos are in the code.** Function names, errors, comments (`Insufficent`, `VunlerableBank`, `ZeroAmountInputed`, etc.). I know they are there.
+> - **Code quality is student-exercise quality.** Some files are uneven. A few safety/style issues are left as-is because the goal was “did I understand this system,” not “would I ship this.”
+> - **Almost no real test coverage yet.** One early gas-report test. That is a known gap, not a hidden one.
+>
+> I am not asking you to ignore this. I am telling you I already see it.
+>
+> **Phase 2 is where this gets cleaned up** — naming, spelling, comments, structure, tests, scripts, and the production-style checks I skipped here so I could focus on solving the problems. That work will live in another repo. See [Phase 2 — what's next](#phase-2--whats-next).
+
+---
+
 I came back to Solidity after a few months away and chose the hard path on purpose.
 
 Instead of grabbing OpenZeppelin and shipping something that *looks* finished, I rebuilt the core mechanics myself — from a written spec, with reasoning before code. Tokens, security patterns, vault math, staking rewards, AMM accounting, flash loans, governance, UUPS upgradeability, Merkle proofs, EIP-712 signatures, gas optimization, and a simplified DAO reentrancy case study.
@@ -119,7 +138,9 @@ Phase 2 has to prove I can **verify them** the way real smart contract work expe
 - Local / testnet deploy flow, env handling, and repeatable setup
 - Scripts that wire multi-contract systems the way a protocol actually boots
 
-### 3. Gas, CI, and engineering hygiene
+### 3. Cleanup, gas, CI, and engineering hygiene
+- Fix **naming, spelling, and consistency** (functions, errors, events, contract names)
+- Clean comments: keep the useful reasoning, drop the pasted-prompt / stream-of-consciousness clutter
 - Proper **gas snapshots / benchmarks** on hot paths
 - Keep CI useful: `forge fmt`, `forge build`, `forge test` — and make the test step mean something once coverage exists
 - Cleaner structure as tests and scripts grow
