@@ -121,35 +121,26 @@ Closer to the EVM and protocol design.
 
 ## Phase 2 — what's next
 
-This is the part I care about most right now.
-
 Phase 1 proved I can **build the mechanics**.  
-Phase 2 has to prove I can **verify them** the way real smart contract work expects.
+Phase 2 is a separate track: **Verification & Systems Engineering** — testing, scripting, deeper gas/EVM, and designing systems from a one-paragraph prompt instead of a given spec.
 
-### 1. Testing (priority)
-- Full **unit tests** for the high-risk contracts first: Vault, StakingRewards, AMM, Reentrancy, Governor, UUPS
-- **Fuzz tests** on math-heavy paths (share pricing, reward accounting, swap invariants)
-- **Invariant tests** where they matter (e.g. vault solvency, AMM `k`, staking reward conservation)
-- Better use of Foundry: `vm.prank`, `vm.warp`, expect-reverts, event assertions
-- Right now there is only early test scaffolding (a gas report test) — not real coverage. That gap is intentional to call out, not hide.
+That work lives in **another repo**. This one stays the contracts-only record.
 
-### 2. Scripting & deployment workflows
-- Real Foundry **deployment scripts** (beyond a basic token deploy)
-- Local / testnet deploy flow, env handling, and repeatable setup
-- Scripts that wire multi-contract systems the way a protocol actually boots
+The short thesis: AI can already write a passable ERC20, a staking contract, and a first-pass test file. Trying to out-type that is a losing game. Phase 2 is about the parts that still require a person — prove it works, prove it can be broken, catch what a generated test suite missed, ship it, and defend a design decision in writing.
 
-### 3. Cleanup, gas, CI, and engineering hygiene
-- Fix **naming, spelling, and consistency** (functions, errors, events, contract names)
-- Clean comments: keep the useful reasoning, drop the pasted-prompt / stream-of-consciousness clutter
-- Proper **gas snapshots / benchmarks** on hot paths
-- Keep CI useful: `forge fmt`, `forge build`, `forge test` — and make the test step mean something once coverage exists
-- Cleaner structure as tests and scripts grow
+The path (in the Phase 2 repo):
 
-### 4. After the foundation is solid
-- Protocol-level projects built on this base
-- A **Uniswap V4 hooks** project with a real design rationale — not another tutorial clone
+| | Focus |
+|---|---|
+| **Module 0** | Naming, NatSpec, layout, production norms — the standard Phase 1 did not hold itself to |
+| **Tier A** | Foundry unit tests — happy path, errors, events, multi-actor flows |
+| **Tier B** | Security tests — prove the exploit, then prove the fix |
+| **Tier C** | Fuzz + invariants — Vault inflation, staking rewards, AMM `k`, Governor state |
+| **Tier D** | Real deploy scripts — Anvil, Sepolia, verify, multi-contract wiring |
+| **Tier E** | Gas from custom errors through storage layout and Yul |
+| **Tier F** | Design from scratch — lending, escrow, threat model, then a Uniswap V4 hooks one-pager |
 
-**Bottom line:** contracts without tests are incomplete. Phase 2 is how I close that — and that work will live in another repo.
+**Bottom line:** this repo is implementation. Phase 2 is verification, shipping, and judgment.
 
 ---
 
