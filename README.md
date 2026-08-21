@@ -239,5 +239,6 @@ forge fmt
 CS student · building toward smart contract / protocol engineering
 
 Phase 1: contracts from scratch · Phase 2: tests, scripts, gas optimization, and designing systems from scratch
+[View Phase 2 Repository](https://github.com/Asout3/Relearn_and_prac_P2)
 
 </div>
