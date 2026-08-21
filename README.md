@@ -19,6 +19,8 @@
 >
 > This is **exercise / learning code**, not production Solidity. Phase 1 was about solving the questions and understanding the mechanics. I did **not** stop to make the files look like a polished library.
 >
+> I understand that smart contract development and testing are inherently linked. However, I intentionally separated them into distinct phases because I want to commit fully to the testing layer. By giving testing its own dedicated focus, I can deep-dive into the verification process, build stronger invariants, and develop a much more solid understanding of the security layer.
+>
 > If you open `src/`, you will see that on purpose:
 >
 > - **The exercise question is often pasted at the top of the file.** I start from the spec, then reason, then write. The question is left in so you can see what I was actually answering.
